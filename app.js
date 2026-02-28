@@ -78,7 +78,91 @@ const crops = {
       settingsDisplay: ["V-Belt: 3","Cutter: 7.5","Tractor RPM: 12"],
       settingsSpeech: ["Keep the V belt at three","Set the cutter at seven point five","Keep tractor RPM at twelve"]
     }
-  }
+  },
+pearl_millet_g: {
+        gu: {
+          name: "બાજરી (G)",
+          settingsDisplay:[
+            "વી બેલ્ટ (પટ્ટા): <b>3</b>",
+            "કટર: <b>4</b>",
+            "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>4</b>",
+            "ચારણા 3 જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>4</b>",
+            "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>4</b>",
+            "રેત જાળી: <b>1.6</b>",
+            "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+            "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+            "ચારણાની ચાલ: <b>લાંબી</b>",
+            "ટ્રેક્ટરનો રેસ: <b>12</b>"
+          ],
+settingsSpeech:[
+  "વી બેલ્ટ ત્રણ રાખો",
+  "કટર ચાર રાખો",
+  "ચારણા બે ની જાળી માં ઉપર છ અને નીચે ચાર રાખો",
+  "ચારણા ત્રણ ની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે ચાર રાખો",
+  "સુપડી જાળી માં ઉપર ચાર અને નીચે ચાર રાખો",
+  "રેત જાળી એક દશાંશ છ રાખો",
+  "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+  "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+  "ચારણાની ચાલ લાંબી રાખો",
+  "ટ્રેક્ટરનો રેસ બાર રાખો"
+]
+        },
+        hi: {
+          name: "बाजरा (G)",
+          settingsDisplay:[
+                   "वी-बेल्ट (पट्टा): <b>3</b>",
+  "कटर: <b>4</b>",
+  "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>4</b>",
+  "छलना 3 जाली:  ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>4</b>",
+  "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>4</b>",
+  "रेत जाली: <b>1.6</b>",
+  "हवा का हैंडल: आगे का  - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+  "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+  "छलने की चाल: <b>लंबी</b>",
+            "ट्रैक्टर का रेस: <b>12</b>"
+          ],
+settingsSpeech:[
+  "वी बेल्ट तीन रखें",
+  "कटर चार रखें",
+  "छलना दो की जाली में ऊपर छह और नीचे चार रखें",
+  "छलना तीन की जाली में ऊपर छह, बीच में पाँच दशमलव पाँच और नीचे चार रखें",
+  "सुपड़ी जाली में ऊपर चार और नीचे चार रखें",
+  "रेत जाली एक दशमलव छह रखें",
+  "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+  "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+  "छलने की चाल लंबी रखें",
+  "ट्रैक्टर का रेस बारह रखें"
+]
+        },
+        en: {
+          name: "Pearl Millet (G)",
+          settingsDisplay:[
+          "V-Belt: <b>3</b>",
+  "Cutter: <b>4</b>",
+  "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>4</b>",
+  "Sieve 3 Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>4</b>",
+  "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>4</b>",
+  "Sand Mesh: <b>1.6</b>",
+  "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+  "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+  "Sieve Movement: <b>Long</b>",
+  "Tractor Race: <b>12</b>"
+          ]
+settingsSpeech:[
+  "Keep the V belt at three",
+  "Set the cutter at four",
+  "In sieve two mesh, keep the upper at six and the lower at four",
+  "In sieve three mesh, keep the upper at six, the middle at five point five, and the lower at four",
+  "In the winnowing mesh, keep both upper and lower at four",
+  "Keep the sand mesh at one point six",
+  "Set the air handle with the front at middle and the rear at up",
+  "Set the chamber curtain with the side down and the rear at medium",
+  "Keep the sieve movement long",
+  "Keep the tractor RPM at twelve"
+]
+        }
+      },
+
 };
 
 const problems = {
