@@ -1,0 +1,127 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#f4f4f9;
+  color:#333;
+  line-height:1.6;
+}
+
+header{
+  background:#d70000;
+  color:white;
+  text-align:center;
+  padding:12px;
+}
+
+.logo{
+  width:80px;
+  margin-bottom:5px;
+}
+
+header h1{
+  font-size:18px;
+}
+
+main{
+  max-width:800px;
+  margin:20px auto;
+  padding:0 15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  margin-bottom:18px;
+  border-radius:6px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+h2{
+  font-size:16px;
+  margin-bottom:10px;
+}
+
+h3{
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+p, li{
+  font-size:14px;
+}
+
+ul{
+  padding-left:18px;
+  margin-bottom:15px;
+}
+
+.section-gap{
+  margin-top:25px;
+}
+
+select{
+  width:100%;
+  padding:8px;
+  font-size:14px;
+  margin-top:6px;
+}
+
+.mt-15{
+  margin-top:15px;
+}
+
+.ukel-btn{
+  margin-top:15px;
+  width:100%;
+  padding:10px;
+  background:#1a8f2d;
+  color:white;
+  border:none;
+  border-radius:20px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.ukel-btn:hover{
+  background:#157824;
+}
+
+.action-container{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-bottom:20px;
+}
+
+.back-btn{
+  padding:8px 15px;
+  background:#f0ad4e;
+  border:none;
+  border-radius:20px;
+  color:white;
+  cursor:pointer;
+}
+
+.stop-btn{
+  padding:8px 15px;
+  background:#d9534f;
+  border:none;
+  border-radius:20px;
+  color:white;
+  cursor:pointer;
+}
+
+.hidden{
+  display:none;
+}
+
+@media (max-width:480px){
+  header h1{font-size:16px;}
+  p, li{font-size:13px;}
+  select{font-size:13px;}
+}
