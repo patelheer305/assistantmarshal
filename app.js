@@ -147,7 +147,7 @@ settingsSpeech:[
   "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
   "Sieve Movement: <b>Long</b>",
   "Tractor Race: <b>12</b>"
-          ]
+          ],
 settingsSpeech:[
   "Keep the V belt at three",
   "Set the cutter at four",
@@ -289,3 +289,4 @@ backBtn.addEventListener("click", ()=>{
 });
 
 });
+
