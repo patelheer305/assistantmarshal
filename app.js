@@ -876,7 +876,7 @@ wheat: {
 const problems = {
   gu: [
     {
-      title: "1. દાણા તૂટવા",
+      title: "દાણા તૂટવા",
       solutionDisplay: [
         "ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.",
         "સૂપડા માં ઓરવાનું પ્રમાણ વધારે/ઓછું હોય તો એકસરખા પ્રમાણમાં ઓરવું.",
@@ -886,7 +886,7 @@ const problems = {
       solutionSpeech: ["ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.", "સૂપડા માં ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "કટર ઊંચી હોય તો ગેજ પ્રમાણે થોડી નીચે ઉતારવી.", "ચેમ્બર નીચે કચરો હોય તો ગીસી પડદો ઊંચો કરવો."]
     },
     {
-      title: "2. ભૂસા સાથે દાણા જવા",
+      title: "ભૂસા સાથે દાણા જવા",
       solutionDisplay: [
         "થ્રેસરની સ્પીડ વધારે હોય તો ટ્રેક્ટરની ગતિ ઓછી કરવી.",
         "પંખા ની સ્પીડ વધારે હોય તો પંખાની સ્પીડ ઓછી કરવી.",
@@ -899,7 +899,7 @@ const problems = {
       solutionSpeech: ["ટ્રેક્ટર અને પંખાની સ્પીડ ઓછી કરવી.", "જો ચારણો ધીમે હોય તો સ્પીડ વધારવી.", "ચારણો પ્રમાણસર નીચે ઉતારવો અને ઢાળ સીધો કરવો.", "સાઈડના અને ગીસી પડદા પ્રમાણસર ઉંચા કરવા."]
     },
     {
-      title: "3. અનાજ સાફ ન નીકળતું હોય",
+      title: "અનાજ સાફ ન નીકળતું હોય",
       solutionDisplay: [
         "રોટરની સ્પીડ ઓછી હોય તો રોટરની સ્પીડ વધારવી.",
         "પંખાની સ્પીડ ઓછી હોય તો પંખાની સ્પીડ વધારવી.",
@@ -917,7 +917,7 @@ const problems = {
       solutionSpeech: ["રોટર અને પંખાની સ્પીડ વધારવી.", "ચારણો ઊંચો કરવો અને પડદા નીચે લેવા.", "સૂપડીનું પતરું બહાર ખેંચવું અને ચારણાનો ઢાળ સેટ કરવો.", "ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "થ્રેસર હુક ઊંચો કરવો, હવા વધારવી અને હવાના ભૂંગળા સાફ કરવા."]
     },
     {
-      title: "4. ચારણાથી બરાબર ચળાતું ન હોય",
+      title: "ચારણાથી બરાબર ચળાતું ન હોય",
       solutionDisplay: [
         "ચારણાની જાળીઓ ભરાઈ ગઈ હોય તો પાવડી (તાવેથા)નો ઉપયોગ કરી જાળીઓ સાફ કરી દેવી.",
         "ચારણો પાછળ નમેલો હોય તો ચારણો સમતોલ કરવો.",
@@ -927,7 +927,7 @@ const problems = {
       solutionSpeech: ["પાવડીથી જાળીઓ સાફ કરવી.", "ચારણો સમતોલ કરવો અને સ્પીડ ઓછી કરવી.", "જાળીઓ સીધી લગાવવી."]
     },
     {
-      title: "5. થ્રેસીંગ ડ્રમ ભરાઇ જવું",
+      title: "થ્રેસીંગ ડ્રમ ભરાઇ જવું",
       solutionDisplay: [
         "એકી સાથે વધારે પડતું ઓરવાતું હોય તો ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.",
         "મેઇન રોટરની સ્પીડ ઓછી હોય તો મેઇન રોટરની સ્પીડ વધારવી.",
@@ -938,7 +938,7 @@ const problems = {
       solutionSpeech: ["ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.", "મેઇન રોટરની સ્પીડ વધારવી.", "સૂકો પાક ઓરવો અને પડદો તેમજ કટર ઊંચા કરવા."]
     },
     {
-      title: "6. થ્રેસર નું ધ્રુજવું",
+      title: "થ્રેસર નું ધ્રુજવું",
       solutionDisplay: [
         "રોટરની શાફ્ટ આઉટ હોય તો રોટરની શાફ્ટ થ્રુ(બેલેન્સ) કરાવવી.",
         "થ્રેસરના ટાયરનો સપોર્ટ ઢીલો પડી ગયો હોય તો પથ્થર કે લાકડાનો ટુકડો મૂકી ટાયરને સપોર્ટ આપવો.",
@@ -955,7 +955,7 @@ const problems = {
   ],
   hi: [
     {
-      title: "1. दाने टूटना",
+      title: "दाने टूटना",
       solutionDisplay: [
         "ट्रैक्टर की गति अधिक हो तो गति कम करे।",
         "सूपड़े में फसल डालने की मात्रा ज़्यादा/कम हो तो एकसमान डाले।",
@@ -965,7 +965,7 @@ const problems = {
       solutionSpeech: ["ट्रैक्टर की गति कम करे।", "फसल एकसमान मात्रा में डाले।", "कटर को थोड़ा नीचे करे और गीसी पड़दे ऊँचा करे।"]
     },
     {
-      title: "2.भूसे के साथ दाने जाना",
+      title: "भूसे के साथ दाने जाना",
       solutionDisplay: [
         "थ्रेशर की गति अधिक हो तो ट्रैक्टर की गति कम करे।",
         "पंखे की गति अधिक हो तो पंखे की गति कम करे।",
@@ -978,7 +978,7 @@ const problems = {
       solutionSpeech: ["ट्रैक्टर और पंखे की गति कम करे।", "छलने की गति बढ़ाएं और ढलाव सही करे।", "साइड के और गीसी पड़दे ऊँचा करे।"]
     },
     {
-      title: "3.फसल साफ न निकलना",
+      title: "फसल साफ न निकलना",
       solutionDisplay: [
         "रोटर की गति कम हो तो रोटर की गति बढ़ाए।",
         "पंखे की गति कम हो तो पंखे की गति बढ़ाए।",
@@ -996,7 +996,7 @@ const problems = {
       solutionSpeech: ["रोटर और पंखे की गति बढ़ाएं।", "छलने और पड़दे की सेटिंग सही करे।", "सूपड़ी का पतरा बाहर खींचे और ढलाव सही करे।", "हुक ऊँचा करे और हवा के पाइप साफ़ करे।"]
     },
     {
-      title: "4. छलना से ठीक न छलना",
+      title: "छलना से ठीक न छलना",
       solutionDisplay: [
         "छलने की नीचे की जालियां भर जाए तो पावड़ी का उपयोग कर छलने की जालियां साफ़ करे।",
         "छलना पीछे झुका हो तो छलने को समतल करे।",
@@ -1006,7 +1006,7 @@ const problems = {
       solutionSpeech: ["जालियों को साफ़ करे और छलने को समतल रखे।", "गति कम करे और जालियां सीधी लगाए।"]
     },
     {
-      title: "5. थ्रेसिंग ड्रम(कोठी) भर जाना",
+      title: "थ्रेसिंग ड्रम(कोठी) भर जाना",
       solutionDisplay: [
         "एक साथ बहुत अधिक फसल न डालें, कोठी खाली करके उसे सही मात्रामें डाले।",
         "मुख्य रोटर की गति कम हो तो उसे सही तरह से बढ़ाए।",
@@ -1017,7 +1017,7 @@ const problems = {
       solutionSpeech: ["कोठी खाली करे और फसल एकसमान डाले।", "रोटर की गति बढ़ाएं और सूखी फसल का उपयोग करे।"]
     },
     {
-      title: "6. थ्रेशर का कंपन",
+      title: "थ्रेशर का कंपन",
       solutionDisplay: [
         "रोटर का शाफ़्ट थ्रु(बैलेन्स) करवाए।",
         "टायर को पत्थर या लकड़ी का टुकड़ा लगाकर सपोर्ट दे।",
@@ -1034,7 +1034,7 @@ const problems = {
   ],
   en: [
     {
-      title: "1. Grain Breakage",
+      title: "Grain Breakage",
       solutionDisplay: [
         "If the tractor's speed is too high, reduce the speed.",
         "If the amount fed into the feeder is incorrect, maintain uniform feeding.",
@@ -1044,7 +1044,7 @@ const problems = {
       solutionSpeech: ["Reduce tractor speed and ensure uniform feeding.", "Adjust the cutter lower and raise the sieve curtain if needed."]
     },
     {
-      title: "2. Grains Going with Chaff",
+      title: "Grains Going with Chaff",
       solutionDisplay: [
         "If the thresher's speed is too high, reduce the tractor's speed.",
         "If the fan's speed is too high, lower the fan's speed.",
@@ -1057,7 +1057,7 @@ const problems = {
       solutionSpeech: ["Reduce speed and adjust the sieve feeder's height and slope.", "Raise the side and internal sieve curtains."]
     },
     {
-      title: "3. Grain Not Coming Out Clean",
+      title: "Grain Not Coming Out Clean",
       solutionDisplay: [
         "If the rotor's speed is low, increase the rotor's speed.",
         "If the fan's speed is low, increase the fan's speed.",
@@ -1075,7 +1075,7 @@ const problems = {
       solutionSpeech: ["Increase rotor and fan speed.", "Adjust sieve and curtain heights.", "Check the feeder sheet, hook height, and clear any nests in air ducts."]
     },
     {
-      title: "4. Sieve Feeder Not Working Properly",
+      title: "Sieve Feeder Not Working Properly",
       solutionDisplay: [
         "If meshes are clogged, clean them using a trowel.",
         "If the sieve feeder is tilted backward, level it.",
@@ -1085,7 +1085,7 @@ const problems = {
       solutionSpeech: ["Clean meshes, level the feeder, and check the speed and mesh orientation."]
     },
     {
-      title: "5. Threshing Drum Jamming",
+      title: "Threshing Drum Jamming",
       solutionDisplay: [
         "Avoid overfeeding; empty the drum and feed proportionately.",
         "If main rotor speed is low, increase it appropriately.",
@@ -1096,7 +1096,7 @@ const problems = {
       solutionSpeech: ["Ensure uniform feeding and increase rotor speed.", "Use dry crops and adjust the curtain and cutter height."]
     },
     {
-      title: "6. Thresher Vibrating",
+      title: "Thresher Vibrating",
       solutionDisplay: [
         "Balance the rotor shaft.",
         "Support the tires with stones or wood if loose.",
