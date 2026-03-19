@@ -874,21 +874,243 @@ wheat: {
 };
 
 const problems = {
-  gu: [{
-    title: "દાણા તૂટવા",
-    solutionDisplay: ["ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.","સૂપડા માં ઓરવાનું પ્રમાણ વધારે/ઓછું હોય તો એકસરખું પ્રમાણમાં ઓરવું.","કટર (કોનકેવ) ઊંચી હોય તો થોડી નીચે ઉતારી ગેજ પ્રમાણે ગોઠવવી","ચેમ્બર નીચે અનાજ કે ભૂસું ભરાઈ ગયું હોય તો ગીસી પડદો ઊંચો કરવો."],
-    solutionSpeech: ["ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.","સૂપડા માં ઓરવાનું પ્રમાણ વધારે/ઓછું હોય તો એકસરખું પ્રમાણમાં ઓરવું.","કટર (કોનકેવ) ઊંચી હોય તો થોડી નીચે ઉતારી ગેજ પ્રમાણે ગોઠવવી","ચેમ્બર નીચે અનાજ કે ભૂસું ભરાઈ ગયું હોય તો ગીસી પડદો ઊંચો કરવો."]
-  }],
-  hi: [{
-    title: "दाने टूटना",
-    solutionDisplay: ["ट्रैक्टर की गति अधिक हो तो गति कम करे।","सूपड़े में फसल डालने की मात्रा ज़्यादा/कम हो तो एकसमान डाले।","कटर (कॉनकेव) ऊँचा हो तो गेज के अनुसार थोड़ा नीचे करे।","चैंबर(कटर) के नीचे फसल या भूसा भर गया हो तो गीसी पड़दे ऊँचा करे।"],
-    solutionSpeech: ["ट्रैक्टर की गति अधिक हो तो गति कम करे।","सूपड़े में फसल डालने की मात्रा ज़्यादा/कम हो तो एकसमान डाले।","कटर (कॉनकेव) ऊँचा हो तो गेज के अनुसार थोड़ा नीचे करे।","चैंबर(कटर) के नीचे फसल या भूसा भर गया हो तो गीसी पड़दे ऊँचा करे।"]
-  }],
-  en: [{
-    title: "Grain Breakage",
-    solutionDisplay: ["If the tractor's speed is too high, reduce the speed.","If the amount fed into the feeder is incorrect, maintain uniform feeding.","If the cutter (concave) is too high, adjust it slightly lower as per the gauge.","If grain or chaff is clogged under the chamber, raise the sieve curtain."],
-    solutionSpeech: ["If the tractor's speed is too high, reduce the speed.","If the amount fed into the feeder is incorrect, maintain uniform feeding.","If the cutter (concave) is too high, adjust it slightly lower as per the gauge.","If grain or chaff is clogged under the chamber, raise the sieve curtain."]
-  }]
+  gu: [
+    {
+      title: "1. દાણા તૂટવા",
+      solutionDisplay: [
+        "ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.",
+        "સૂપડા માં ઓરવાનું પ્રમાણ વધારે/ઓછું હોય તો એકસરખા પ્રમાણમાં ઓરવું.",
+        "કટર (કોનકેવ) ઊંચી હોય તો થોડી નીચે ઉતારી ગેજ પ્રમાણે ગોઠવવી.",
+        "ચેમ્બર નીચે અનાજ કે ભૂસું ભરાઈ ગયું હોય તો ગીસી પડદો ઊંચો કરવો."
+      ],
+      solutionSpeech: ["ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.", "સૂપડા માં ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "કટર ઊંચી હોય તો ગેજ પ્રમાણે થોડી નીચે ઉતારવી.", "ચેમ્બર નીચે કચરો હોય તો ગીસી પડદો ઊંચો કરવો."]
+    },
+    {
+      title: "2. ભૂસા સાથે દાણા જવા",
+      solutionDisplay: [
+        "થ્રેસરની સ્પીડ વધારે હોય તો ટ્રેક્ટરની ગતિ ઓછી કરવી.",
+        "પંખા ની સ્પીડ વધારે હોય તો પંખાની સ્પીડ ઓછી કરવી.",
+        "ચારણો ધીમે ચાલતો હોય તો ચારણા ની સ્પીડ વધારવી.",
+        "ચારણો વધારે ઊંચો હોય તો ચારણો પ્રમાણસર નીચે ઉતારવો.",
+        "ચારણો નો ઢાળ ઉલટો હોય તો ચારણો દાણા નીકળવાની બાજુએ નીચે કરવો.",
+        "થ્રેસરના ચેમ્બર નીચેના સાઈડના પડદા વધારે પડતા નીચે રાખેલા હોય તો પડદા પ્રમાણસર ઉંચા કરી સેટ કરવા.",
+        "થ્રેસરમાં ચેમ્બરની અંદરનો ગીસી પડદો નીચે હોય તો ગીસી વાળો પડદો પ્રમાણસર ઉંચે ઉઠાવી લેવો."
+      ],
+      solutionSpeech: ["ટ્રેક્ટર અને પંખાની સ્પીડ ઓછી કરવી.", "જો ચારણો ધીમે હોય તો સ્પીડ વધારવી.", "ચારણો પ્રમાણસર નીચે ઉતારવો અને ઢાળ સીધો કરવો.", "સાઈડના અને ગીસી પડદા પ્રમાણસર ઉંચા કરવા."]
+    },
+    {
+      title: "3. અનાજ સાફ ન નીકળતું હોય",
+      solutionDisplay: [
+        "રોટરની સ્પીડ ઓછી હોય તો રોટરની સ્પીડ વધારવી.",
+        "પંખાની સ્પીડ ઓછી હોય તો પંખાની સ્પીડ વધારવી.",
+        "ચારણો વધારે પડતો નીચે લીધેલો હોય તો ચારણો ઊંચો કરવો.",
+        "થ્રેસરમાં ચેમ્બરની અંદરનો ગીસી પડદો ઉંચો લીધેલો હોય તો ગીસી પડદો નીચે લેવો.",
+        "થ્રેસરના ચેમ્બર નીચેના સાઈડના પડદા ઉંચા લીધેલા હોય તો પડદા પ્રમાણસર નીચે રાખવા.",
+        "સૂપડીમાં જાળી નીચે ખસતું પતરું અંદરની બાજુ ખેંચેલું હોય તો પતરું બહારની બાજુ ખેંચી લેવું.",
+        "ચારણાનો ઢાળ પાછળ વધારે હોય તો ચારણો પાછળથી ઉંચો લેવો.",
+        "ચારણાની સ્પીડ ઓછી કે વધારે હોય તો ચારણાની સ્પીડ મધ્યમ કરવી.",
+        "સૂપડામાં ઓછું કે વધારે ઓરવામાં આવતું હોય તો એક સરખા પ્રમાણમાં ઓરવું.",
+        "થ્રેસર હુક આગળથી નીચું હોય તો થ્રેસર હુક આગળથી ઉંચું કરવું.",
+        "સૂપડીમાં હવા ઓછી કરેલ હોય તો સૂપડીમાં હવા વધારી દેવી.",
+        "હવાના નાના ભૂંગળામાં ખિસકોલી એ માળો કરેલો હોય તો માળો કાઢી નાખવો."
+      ],
+      solutionSpeech: ["રોટર અને પંખાની સ્પીડ વધારવી.", "ચારણો ઊંચો કરવો અને પડદા નીચે લેવા.", "સૂપડીનું પતરું બહાર ખેંચવું અને ચારણાનો ઢાળ સેટ કરવો.", "ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "થ્રેસર હુક ઊંચો કરવો, હવા વધારવી અને હવાના ભૂંગળા સાફ કરવા."]
+    },
+    {
+      title: "4. ચારણાથી બરાબર ચળાતું ન હોય",
+      solutionDisplay: [
+        "ચારણાની જાળીઓ ભરાઈ ગઈ હોય તો પાવડી (તાવેથા)નો ઉપયોગ કરી જાળીઓ સાફ કરી દેવી.",
+        "ચારણો પાછળ નમેલો હોય તો ચારણો સમતોલ કરવો.",
+        "ચારણાની સ્પીડ વધારે હોય તો ચારણાની સ્પીડ ઓછી કરવી.",
+        "ચારણામાં જાળીઓ ઉંધી લગાવેલી હોય તો જાળીઓ સીધી લગાવી દેવી."
+      ],
+      solutionSpeech: ["પાવડીથી જાળીઓ સાફ કરવી.", "ચારણો સમતોલ કરવો અને સ્પીડ ઓછી કરવી.", "જાળીઓ સીધી લગાવવી."]
+    },
+    {
+      title: "5. થ્રેસીંગ ડ્રમ ભરાઇ જવું",
+      solutionDisplay: [
+        "એકી સાથે વધારે પડતું ઓરવાતું હોય તો ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.",
+        "મેઇન રોટરની સ્પીડ ઓછી હોય તો મેઇન રોટરની સ્પીડ વધારવી.",
+        "ભેજવાળું કે લીલું ઓરવામાં આવતું હોય તો સૂકાયેલું ઓરવું.",
+        "થ્રેસીંગ ચેમ્બરની અંદરનો ગીસી પડદો નીચે ઉતરી ગયો હોય તો ગીસી પડદો યોગ્ય પ્રમાણમાં ઉંચો લેવો.",
+        "થ્રેસીંગ ચેમ્બરની કટર વધારે પડતી નીચી રાખેલી હોય તો કટર સાધારણ ઉંચી કરવી."
+      ],
+      solutionSpeech: ["ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.", "મેઇન રોટરની સ્પીડ વધારવી.", "સૂકો પાક ઓરવો અને પડદો તેમજ કટર ઊંચા કરવા."]
+    },
+    {
+      title: "6. થ્રેસર નું ધ્રુજવું",
+      solutionDisplay: [
+        "રોટરની શાફ્ટ આઉટ હોય તો રોટરની શાફ્ટ થ્રુ(બેલેન્સ) કરાવવી.",
+        "થ્રેસરના ટાયરનો સપોર્ટ ઢીલો પડી ગયો હોય તો પથ્થર કે લાકડાનો ટુકડો મૂકી ટાયરને સપોર્ટ આપવો.",
+        "ટાયરમાં હવાનું પ્રમાણ ઘટી ગયું હોય તો ટાયરોમાં પ્રમાણસર હવા ભરાવી લેવી.",
+        "મેઇન રોટરનું યોગ્ય રીતે બેલેન્સ કરેલું ન હોય તો મેઇન રોટરને બેલેન્સ કરાવી લેવું.",
+        "બેરીંગો તૂટી ગઈ હોય તો નવી બેરીંગો નખાવવી.",
+        "થ્રેસર કે ટ્રેક્ટર સાઈડ જોઈન્ટ આઉટ થઈ ગયો હોય તો જોઈન્ટ વ્યવસ્થિત લેથ ઉપર ચઢાવી રીપેરીંગ કરી દેવો.",
+        "થ્રેસરમાં રોટરના પાટા ખોટી રીતે લગાવેલા હોય તો પાટા ખોલીને લાઈન મુજબ લગાવી દેવા.",
+        "થ્રેસરનું ફ્લાયવ્હીલ આઉટ હોય તો ફ્લાયવ્હીલ બદલીને નવું લગાવી દેવું.",
+        "વી-બેલ્ટ (પટ્ટા) ઢીલા પડી ગયા હોય તો સપોર્ટપુલીથી પટ્ટા ટાઈટ કરવા."
+      ],
+      solutionSpeech: ["રોટર શાફ્ટ અને બેલેન્સિંગ ચેક કરાવવું.", "ટાયર સપોર્ટ અને હવા ચેક કરવી.", "બેરીંગો અને જોઈન્ટ રીપેર કરાવવા.", "રોટરના પાટા લાઈનમાં લગાવવા અને વી-બેલ્ટ ટાઈટ કરવા."]
+    }
+  ],
+  hi: [
+    {
+      title: "1. दाने टूटना",
+      solutionDisplay: [
+        "ट्रैक्टर की गति अधिक हो तो गति कम करे।",
+        "सूपड़े में फसल डालने की मात्रा ज़्यादा/कम हो तो एकसमान डाले।",
+        "कटर (कॉनकेव) ऊँचा हो तो गेज के अनुसार थोड़ा नीचे करे।",
+        "चैंबर(कटर) के नीचे फसल या भूसा भर गया हो तो गीसी पड़दे ऊँचा करे।"
+      ],
+      solutionSpeech: ["ट्रैक्टर की गति कम करे।", "फसल एकसमान मात्रा में डाले।", "कटर को थोड़ा नीचे करे और गीसी पड़दे ऊँचा करे।"]
+    },
+    {
+      title: "2.भूसे के साथ दाने जाना",
+      solutionDisplay: [
+        "थ्रेशर की गति अधिक हो तो ट्रैक्टर की गति कम करे।",
+        "पंखे की गति अधिक हो तो पंखे की गति कम करे।",
+        "छलना धीमा चलता हो तो छलने की गति बढ़ाए।",
+        "छलना ज़्यादा ऊँचा हो तो छलने को सही मात्रा में नीचे उतारे।",
+        "छलने का ढलाव उल्टा हो तो छलने को दाने निकलने की ओर नीचे करे।",
+        "थ्रेशर में चैंबर के नीचे की साइड के पड़दे ज़्यादा नीचे रखे हों तो पड़दे को सही मात्रा में ऊँचा करके सेट करे।",
+        "थ्रेशर में चैंबर के अंदर का गीसी पड़दा नीचे हो तो सही मात्रा में ऊँचा उठाले।"
+      ],
+      solutionSpeech: ["ट्रैक्टर और पंखे की गति कम करे।", "छलने की गति बढ़ाएं और ढलाव सही करे।", "साइड के और गीसी पड़दे ऊँचा करे।"]
+    },
+    {
+      title: "3.फसल साफ न निकलना",
+      solutionDisplay: [
+        "रोटर की गति कम हो तो रोटर की गति बढ़ाए।",
+        "पंखे की गति कम हो तो पंखे की गति बढ़ाए।",
+        "छलना ज़्यादा नीचे लिया गया हो तो छलने को ऊँचा करे।",
+        "थ्रेशर में चैंबर के अंदर का गीसी पड़दा ऊँचा लिया गया हो तो नीचे करे।",
+        "थ्रेशर के चैंबर के नीचे की साइड के पड़दे ऊँचे लिए गए हों तो पर्दों को सही मात्रा में नीचे रखे।",
+        "सूपड़ी में जाली के नीचे खिसकने वाला पतरा अंदर की ओर खींचा गया हो तो पतरे को बाहर की ओर खींच ले।",
+        "छलने का ढलाव पीछे अधिक हो तो छलने को पीछे से ऊँचा करे।",
+        "छलने की गति ज़्यादा/कम हो तो मध्यम करे।",
+        "सूपड़े में फसल एकसमान मात्रा में डाले।",
+        "थ्रेशर हुक आगे से नीचा हो तो उसे ऊँचा करे।",
+        "सूपडी में हवा कम की गई हो तो उसे बढ़ा दे।",
+        "हवा के छोटे भूंगले में गिलहरी ने घोंसला बनाया हो तो घोंसला हटा दे।"
+      ],
+      solutionSpeech: ["रोटर और पंखे की गति बढ़ाएं।", "छलने और पड़दे की सेटिंग सही करे।", "सूपड़ी का पतरा बाहर खींचे और ढलाव सही करे।", "हुक ऊँचा करे और हवा के पाइप साफ़ करे।"]
+    },
+    {
+      title: "4. छलना से ठीक न छलना",
+      solutionDisplay: [
+        "छलने की नीचे की जालियां भर जाए तो पावड़ी का उपयोग कर छलने की जालियां साफ़ करे।",
+        "छलना पीछे झुका हो तो छलने को समतल करे।",
+        "छलने की गति अधिक हो तो उसे कम करे।",
+        "छलने में जालियाँ उलटी लगी हों तो उन्हें सीधा लगाए।"
+      ],
+      solutionSpeech: ["जालियों को साफ़ करे और छलने को समतल रखे।", "गति कम करे और जालियां सीधी लगाए।"]
+    },
+    {
+      title: "5. थ्रेसिंग ड्रम(कोठी) भर जाना",
+      solutionDisplay: [
+        "एक साथ बहुत अधिक फसल न डालें, कोठी खाली करके उसे सही मात्रामें डाले।",
+        "मुख्य रोटर की गति कम हो तो उसे सही तरह से बढ़ाए।",
+        "गीली या हरी फसल डाली जा रही हो तो सुखी ही डाले।",
+        "थ्रेसिंग चैम्बर के अंदर का गीसी पड़दा नीचे उतर गया हो तो सही मात्रा में ऊपर करे।",
+        "थ्रेसिंग चैंबर का कटर बहुत नीचा रखा गया हो तो कटर को सही मात्रा में ऊँचा करे।"
+      ],
+      solutionSpeech: ["कोठी खाली करे और फसल एकसमान डाले।", "रोटर की गति बढ़ाएं और सूखी फसल का उपयोग करे।"]
+    },
+    {
+      title: "6. थ्रेशर का कंपन",
+      solutionDisplay: [
+        "रोटर का शाफ़्ट थ्रु(बैलेन्स) करवाए।",
+        "टायर को पत्थर या लकड़ी का टुकड़ा लगाकर सपोर्ट दे।",
+        "टायर में हवा का दबाव सही रखें।",
+        "मेन रोटर का बैलेंसिंग सही करवाएं।",
+        "बेअरिंग तूट गई हो तो नई डलवाए।",
+        "थ्रेशर या ट्रेक्टर साईड जॉइंट आउट हो तो लेथ पर रिपेर करवाए।",
+        "रोटर के पाटे सही लाइन में लगाए।",
+        "लोडव्हील आउट हो तो नया डलवाए।",
+        "वी बेल्ट ढीले पड़े हो तो सपोर्ट पुली से टाइट करे।"
+      ],
+      solutionSpeech: ["शाफ़्ट और बैलेंसिंग चेक करवाए।", "टायर और बेअरिंग की जांच करे।", "जॉइंट और पाटे सही करे और बेल्ट टाइट करे।"]
+    }
+  ],
+  en: [
+    {
+      title: "1. Grain Breakage",
+      solutionDisplay: [
+        "If the tractor's speed is too high, reduce the speed.",
+        "If the amount fed into the feeder is incorrect, maintain uniform feeding.",
+        "If the cutter (concave) is too high, adjust it slightly lower as per the gauge.",
+        "If grain or chaff is clogged under the chamber, raise the sieve curtain."
+      ],
+      solutionSpeech: ["Reduce tractor speed and ensure uniform feeding.", "Adjust the cutter lower and raise the sieve curtain if needed."]
+    },
+    {
+      title: "2. Grains Going with Chaff",
+      solutionDisplay: [
+        "If the thresher's speed is too high, reduce the tractor's speed.",
+        "If the fan's speed is too high, lower the fan's speed.",
+        "If the sieve feeder runs slowly, increase the sieve feeder's speed.",
+        "If the sieve feeder is too high, lower it proportionately.",
+        "If the sieve feeder's slope is reversed, lower it toward the grain outlet side.",
+        "If the chamber's side curtains are too low, raise them proportionately.",
+        "If the sieve curtain inside the chamber is too low, raise it proportionately."
+      ],
+      solutionSpeech: ["Reduce speed and adjust the sieve feeder's height and slope.", "Raise the side and internal sieve curtains."]
+    },
+    {
+      title: "3. Grain Not Coming Out Clean",
+      solutionDisplay: [
+        "If the rotor's speed is low, increase the rotor's speed.",
+        "If the fan's speed is low, increase the fan's speed.",
+        "If the sieve feeder is set too low, raise it.",
+        "If the sieve curtain inside the chamber is set too high, lower it.",
+        "If the chamber's side curtains are set too high, lower them proportionately.",
+        "If the movable sheet under the feeder mesh is pulled inward, pull it outward.",
+        "If the sieve feeder's rear slope is too high, raise the rear end.",
+        "If the sieve feeder's speed is incorrect, set it to medium speed.",
+        "Feed crops uniformly into the feeder.",
+        "If the thresher hook is low, raise the front of the hook.",
+        "If air flow in the feeder is low, increase it.",
+        "If squirrels have nested in air ducts, remove the nest."
+      ],
+      solutionSpeech: ["Increase rotor and fan speed.", "Adjust sieve and curtain heights.", "Check the feeder sheet, hook height, and clear any nests in air ducts."]
+    },
+    {
+      title: "4. Sieve Feeder Not Working Properly",
+      solutionDisplay: [
+        "If meshes are clogged, clean them using a trowel.",
+        "If the sieve feeder is tilted backward, level it.",
+        "If the speed is too high, reduce it.",
+        "If meshes are installed upside down, install them correctly."
+      ],
+      solutionSpeech: ["Clean meshes, level the feeder, and check the speed and mesh orientation."]
+    },
+    {
+      title: "5. Threshing Drum Jamming",
+      solutionDisplay: [
+        "Avoid overfeeding; empty the drum and feed proportionately.",
+        "If main rotor speed is low, increase it appropriately.",
+        "If crops are wet, feed dried crops.",
+        "If the internal sieve curtain is low, raise it.",
+        "If the cutter is too low, raise it slightly."
+      ],
+      solutionSpeech: ["Ensure uniform feeding and increase rotor speed.", "Use dry crops and adjust the curtain and cutter height."]
+    },
+    {
+      title: "6. Thresher Vibrating",
+      solutionDisplay: [
+        "Balance the rotor shaft.",
+        "Support the tires with stones or wood if loose.",
+        "Maintain correct tire pressure.",
+        "Ensure the main rotor is properly balanced.",
+        "Replace broken bearings.",
+        "Repair misaligned joints on a lathe.",
+        "Align rotor blades correctly in a line.",
+        "Replace the flywheel if it is out.",
+        "Tighten loose V-belts using the pulley."
+      ],
+      solutionSpeech: ["Balance the shaft and rotor.", "Check tires and bearings.", "Repair joints and align blades and belts."]
+    }
+  ]
 };
 
 const languageSelect = document.getElementById("languageSelect");
