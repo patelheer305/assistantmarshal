@@ -39,6 +39,33 @@ const uiText = {
   }
 };
 
+const models = {
+  shahenshah: {
+    type: "noVBelt",
+    crops: ["cumin","wheat","pearl_millet_g","pearl_millet_r"]
+  },
+  smart_single: {
+    type: "noVBelt",
+    crops: ["cumin","wheat"]
+  },
+  jageerdar_single: {
+    type: "noVBelt",
+    crops: ["cumin","wheat"]
+  },
+  smart_double: {
+    type: "doubleShaft",
+    crops: ["cumin","wheat","pearl_millet_g"]
+  },
+  jageerdar_double: {
+    type: "doubleShaft",
+    crops: ["cumin","wheat","pearl_millet_g"]
+  },
+  maharaja: {
+    type: "maharaja",
+    crops: Object.keys(crops)
+  }
+};
+  
 const crops = {
 pearl_millet_g: {
         gu: {
@@ -1111,6 +1138,7 @@ const problemSelect = document.getElementById("problemSelect");
 const ukelBtn = document.getElementById("ukelBtn");
 const backBtn = document.getElementById("backBtn");
 const stopVoiceBtn = document.getElementById("stopVoiceBtn");
+const modelSelect = document.getElementById("modelSelect");
 
 const languageBox = document.getElementById("languageBox");
 const selectionBox = document.getElementById("selectionBox");
@@ -1123,6 +1151,7 @@ languageSelect.addEventListener("change", function(){
   const lang = this.value;
   if(!lang) return;
 
+  document.getElementById("modelTitle").innerText = "Select Model";
   document.getElementById("cropTitle").innerText = uiText[lang].crop;
   document.getElementById("problemTitle").innerText = uiText[lang].problem;
   ukelBtn.innerText = uiText[lang].button;
@@ -1136,7 +1165,75 @@ languageSelect.addEventListener("change", function(){
     option.textContent = crops[key][lang].name;
     cropSelect.appendChild(option);
   });
+  
+modelSelect.addEventListener("change", function(){
 
+  const modelKey = this.value;
+  const lang = languageSelect.value;
+
+  if(!modelKey || !lang) return;
+
+  // Clear crop dropdown
+  cropSelect.innerHTML = '<option value="">--</option>';
+
+  // Filter crops based on model
+  models[modelKey].crops.forEach(key=>{
+    if(crops[key]){
+      let option = document.createElement("option");
+      option.value = key;
+      option.textContent = crops[key][lang].name;
+      cropSelect.appendChild(option);
+    }
+  });
+  
+function getVBeltSettings(modelType, cropData, lang){
+
+  let lines = [];
+
+  // Skip for single shaft models
+  if(modelType === "noVBelt") return lines;
+
+  const modeText = {
+    gu: { single: "સિંગલ શાફ્ટ મોડ", double: "ડબલ શાફ્ટ મોડ" },
+    hi: { single: "सिंगल शाफ्ट मोड", double: "डबल शाफ्ट मोड" },
+    en: { single: "Single shaft mode", double: "Double shaft mode" }
+  };
+
+  const mode = cropData.settingsDisplay[0]?.includes("ડબલ") ? "double" : "single";
+
+  if(modelType === "doubleShaft"){
+
+    if(mode === "single"){
+      lines.push(modeText[lang].single);
+      lines.push("Bottom pulley → Large");
+      lines.push("Top pulley → Small");
+    } else {
+      lines.push(modeText[lang].double);
+      lines.push("Rotor: Bottom small, Top large");
+      lines.push("Fan: Bottom large, Fan small");
+    }
+  }
+
+  if(modelType === "maharaja"){
+
+    if(mode === "single"){
+      lines.push(modeText[lang].single);
+      lines.push("Bottom pulley large, Top small");
+    } else {
+      lines.push(modeText[lang].double);
+      lines.push("Bottom pulley small, Top large");
+    }
+
+    // groove (optional)
+    if(cropData.fanGroove){
+      lines.push("Fan groove: " + cropData.fanGroove);
+    }
+  }
+
+  return lines;
+}
+});
+  
   problemSelect.innerHTML = '<option value="">--</option>';
   problems[lang].forEach((p,index)=>{
     let option = document.createElement("option");
@@ -1157,6 +1254,18 @@ ukelBtn.addEventListener("click", function(){
   if(!cropKey || problemIndex==="") return;
 
   const cropData = crops[cropKey][lang];
+  const modelKey = modelSelect.value;
+
+  const modelType = models[modelKey]?.type;
+
+let finalSettings = [...cropData.settingsDisplay];
+
+// Inject V-belt logic
+const vbelt = getVBeltSettings(modelType, cropData, lang);
+
+if(vbelt.length){
+  finalSettings.splice(1, 0, ...vbelt);
+}
   const problemData = problems[lang][problemIndex];
 
   languageBox.classList.add("hidden");
@@ -1174,13 +1283,19 @@ ukelBtn.addEventListener("click", function(){
 
   resultBox.innerHTML = `
     <h2>${uiText[lang].settingTitle}</h2>
-    <ul>${cropData.settingsDisplay.map(s=>`<li>${s}</li>`).join("")}</ul>
+   <ul>${finalSettings.map(s=>`<li>${s}</li>`).join("")}</ul>
     <div style="margin-top:25px;"></div>
     <h2>${uiText[lang].solutionTitle}</h2>
     <ul>${problemData.solutionDisplay.map(s=>`<li>${s}</li>`).join("")}</ul>
   `;
 
-  speak(lang, cropData.settingsSpeech, problemData.solutionSpeech);
+  let finalSpeech = [...cropData.settingsSpeech];
+
+if(vbelt.length){
+  finalSpeech.splice(1, 0, ...vbelt);
+}
+
+speak(lang, finalSpeech, problemData.solutionSpeech);
 });
 
 function speak(lang, settings, solutions){
