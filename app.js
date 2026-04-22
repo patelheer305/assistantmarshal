@@ -38,33 +38,6 @@ const uiText = {
     introSolution: "For this problem, follow these solutions."
   }
 };
-
-const models = {
-  shahenshah: {
-    type: "noVBelt",
-    crops: ["cumin","wheat","pearl_millet_g","pearl_millet_r"]
-  },
-  smart_single: {
-    type: "noVBelt",
-    crops: ["cumin","wheat"]
-  },
-  jageerdar_single: {
-    type: "noVBelt",
-    crops: ["cumin","wheat"]
-  },
-  smart_double: {
-    type: "doubleShaft",
-    crops: ["cumin","wheat","pearl_millet_g"]
-  },
-  jageerdar_double: {
-    type: "doubleShaft",
-    crops: ["cumin","wheat","pearl_millet_g"]
-  },
-  maharaja: {
-    type: "maharaja",
-    crops: Object.keys(crops)
-  }
-};
   
 const crops = {
 pearl_millet_g: {
@@ -890,6 +863,33 @@ wheat: {
     }
   }
 
+};
+
+const models = {
+  shahenshah: {
+    type: "noVBelt",
+    crops: ["cumin","wheat","pearl_millet_g","pearl_millet_r"]
+  },
+  smart_single: {
+    type: "noVBelt",
+    crops: ["cumin","wheat"]
+  },
+  jageerdar_single: {
+    type: "noVBelt",
+    crops: ["cumin","wheat"]
+  },
+  smart_double: {
+    type: "doubleShaft",
+    crops: ["cumin","wheat","pearl_millet_g"]
+  },
+  jageerdar_double: {
+    type: "doubleShaft",
+    crops: ["cumin","wheat","pearl_millet_g"]
+  },
+  maharaja: {
+    type: "maharaja",
+    crops: Object.keys(crops)
+  }
 };
 
 const problems = {
