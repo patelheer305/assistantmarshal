@@ -1170,6 +1170,8 @@ modelSelect.addEventListener("change", function(){
 
   const modelKey = this.value;
   const lang = languageSelect.value;
+  cropSelect.disabled = false;
+
 
   if(!modelKey || !lang) return;
 
