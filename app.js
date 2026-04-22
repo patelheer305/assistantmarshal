@@ -1268,7 +1268,7 @@ const vbelt = getVBeltSettings(modelType, cropData, lang);
 if(vbelt.length){
   finalSettings.splice(1, 0, ...vbelt);
 }
-  const problemData = problems[lang][problemIndex];
+  const problemData = problemIndex !== "" ? problems[lang][problemIndex] : null;
 
   languageBox.classList.add("hidden");
   selectionBox.classList.add("hidden");
