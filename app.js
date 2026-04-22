@@ -1288,7 +1288,10 @@ if(vbelt.length){
    <ul>${finalSettings.map(s=>`<li>${s}</li>`).join("")}</ul>
     <div style="margin-top:25px;"></div>
     <h2>${uiText[lang].solutionTitle}</h2>
-    <ul>${problemData.solutionDisplay.map(s=>`<li>${s}</li>`).join("")}</ul>
+    ${problemData ? `
+  <h2>${uiText[lang].solutionTitle}</h2>
+  <ul>${problemData.solutionDisplay.map(s=>`<li>${s}</li>`).join("")}</ul>
+` : ""}
   `;
 
   let finalSpeech = [...cropData.settingsSpeech];
@@ -1297,7 +1300,11 @@ if(vbelt.length){
   finalSpeech.splice(1, 0, ...vbelt);
 }
 
-speak(lang, finalSpeech, problemData.solutionSpeech);
+speak(
+  lang,
+  finalSpeech,
+  problemData ? problemData.solutionSpeech : []
+);
 });
 
 function speak(lang, settings, solutions){
