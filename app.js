@@ -1,128 +1,405 @@
-document.addEventListener("DOMContentLoaded", function(){
+// ====================== GLOBAL STATE ======================
+let currentLang = "";
+let selectedModel = "";
 
-const uiText = {
-  gu: {
-    crop: "પાક પસંદ કરો",
-    problem: "તકલીફ પસંદ કરો",
-    button: "ઉકેલ",
-    back: "પાછળ જાઓ",
-    stop: "આવાજ બંધ કરો",
-    settingTitle: "પાક સેટિંગ",
-    solutionTitle: "તકલીફનો ઉકેલ",
-    languageName: "ગુજરાતી",
-    introSetting: "હવે તમે પસંદ કરેલા પાક માટે સેટિંગ આ પ્રમાણે રાખો.",
-    introSolution: "આ તકલીફ માટે નીચે મુજબ ઉકેલ કરો."
-  },
-  hi: {
-    crop: "फसल चुनें",
-    problem: "समस्या चुनें",
-    button: "समाधान",
-    back: "वापस जाएं",
-    stop: "आवाज़ बंद करें",
-    settingTitle: "फसल सेटिंग",
-    solutionTitle: "समस्या का समाधान",
-    languageName: "हिंदी",
-    introSetting: "अब आपके द्वारा चुनी गई फसल के लिए सेटिंग इस प्रकार रखें।",
-    introSolution: "इस समस्या के लिए निम्न समाधान करें।"
-  },
-  en: {
-    crop: "Select Crop",
-    problem: "Select Problem",
-    button: "Get Solution",
-    back: "Back",
-    stop: "Stop Voice",
-    settingTitle: "Crop Setting",
-    solutionTitle: "Problem Solution",
-    languageName: "English",
-    introSetting: "Now keep the machine settings as follows.",
-    introSolution: "For this problem, follow these solutions."
-  }
+// ====================== MODELS ======================
+const models = {
+    shahenshah:       { name: { en: "Marshal Shahenshah Thresher", hi: "मार्शल शहेनशाह थ्रेसर", gu: "માર્શલ શહેનશાહ થ્રેસર" }, modes: ["single"], type: "standard_single" },
+    maharaja:         { name: { en: "Marshal Maharaja Thresher", hi: "मार्शल महाराजा थ्रेसर", gu: "માર્શલ મહારાજા થ્રેસર" }, modes: ["single","double"], type: "maharaja" },
+    jageerdar_single: { name: { en: "Marshal Jageerdar Single Shaft Thresher", hi: "मार्शल जागीरदार सिंगल शाफ्ट थ्रेसर", gu: "માર્શલ જાગીરદાર સિંગલ શાફ્ટ થ્રેસર" }, modes: ["single"], type: "standard_single" },
+    jageerdar_double: { name: { en: "Marshal Jageerdar Double Shaft Thresher", hi: "मार्शल जागीरदार डबल शाफ्ट थ्रेसर", gu: "માર્શલ જાગીરદાર ડબલ શાફ્ટ થ્રેસર" }, modes: ["single","double"], type: "smart_double" },
+    smart_single:     { name: { en: "Marshal Smart Single Shaft Thresher", hi: "मार्शल स्मार्ट सिंगल शाफ्ट थ्रेसर", gu: "માર્શલ સ્માર્ટ સિંગલ શાફ્ટ થ્રેસર" }, modes: ["single"], type: "standard_single" },
+    smart_double:     { name: { en: "Marshal Smart Double Shaft Thresher", hi: "मार्शल स्मार्ट डबल शाफ्ट थ्रेसर", gu: "માર્શલ સ્માર્ટ ડબલ શાફ્ટ થ્રેસર" }, modes: ["single","double"], type: "smart_double" }
 };
-  
-const crops = {
-pearl_millet_g: {
-        gu: {
-          name: "બાજરી (G)",
-          settingsDisplay:[
-            "ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>",
-            "કટર: <b>4</b>",
-            "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>4</b>",
-            "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>4</b>",
-            "રેત જાળી: <b>1.6</b>",
-            "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
-            "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
-            "ચારણાની ચાલ: <b>લાંબી</b>",
-            "ટ્રેક્ટરનો રેસ: <b>12</b>"
-          ],
-settingsSpeech:[
-  "ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો",
-  "કટર ચાર રાખો",
-  "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે ચાર રાખો",
-  "સુપડી જાળી માં ઉપર ચાર અને નીચે ચાર રાખો",
-  "રેત જાળી એક દશાંશ છ રાખો",
-  "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
-  "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
-  "ચારણાની ચાલ લાંબી રાખો",
-  "ટ્રેક્ટરનો રેસ બાર રાખો"
-]
-        },
-  hi: {
-          name: "बाजरा (G)",
-          settingsDisplay:[
-                   "ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>",
-  "कटर: <b>4</b>",
-  "छलना जाली:  ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>4</b>",
-  "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>4</b>",
-  "रेत जाली: <b>1.6</b>",
-  "हवा का हैंडल: आगे का  - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
-  "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
-  "छलने की चाल: <b>लंबी</b>",
-            "ट्रैक्टर का रेस: <b>12</b>"
-          ],
-settingsSpeech:[
-  "ऑपरेटिंग मोड डबल शाफ़्ट रखें",
-  "कटर चार रखें",
-  "छलने की जाली में ऊपर छह, बीच में पाँच दशमलव पाँच और नीचे चार रखें",
-  "सुपड़ी जाली में ऊपर चार और नीचे चार रखें",
-  "रेत जाली एक दशमलव छह रखें",
-  "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
-  "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
-  "छलने की चाल लंबी रखें",
-  "ट्रैक्टर का रेस बारह रखें"
-]
-        },
-        en: {
-          name: "Pearl Millet (G)",
-          settingsDisplay:[
-          "Operating mode: <b>Single shaft</b>",
-  "Cutter: <b>4</b>",
-  "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>4</b>",
-  "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>4</b>",
-  "Sand Mesh: <b>1.6</b>",
-  "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
-  "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
-  "Sieve Movement: <b>Long</b>",
-  "Tractor Race: <b>12</b>"
-          ],
-settingsSpeech:[
-  "Keep operating mode on single shaft",
-  "Set the cutter at four",
-  "In sieve mesh, keep the upper at six, the middle at five point five, and the lower at four",
-  "In the winnowing mesh, keep both upper and lower at four",
-  "Keep the sand mesh at one point six",
-  "Set the air handle with the front at middle and the rear at up",
-  "Set the chamber curtain with the side down and the rear at medium",
-  "Keep the sieve movement long",
-  "Keep the tractor RPM at twelve"
-]
+
+// ====================== UI TEXT ======================
+const uiText = {
+    gu: { modelTitle: "મોડલ પસંદ કરો", crop: "પાક પસંદ કરો", problem: "જનરલ સેટિંગ સમસ્યા પસંદ કરો (વૈકલ્પિક)", button: "ઉકેલ", back: "પાછળ જાઓ", stop: "આવાજ બંધ કરો", settingTitle: "પાક સેટિંગ", solutionTitle: "તકલીફનો ઉકેલ", languageName: "ગુજરાતી", introSetting: "માર્શલ થ્રેશરમાં તમે પસંદ કરેલા પાક માટે સેટિંગ આ પ્રમાણે રાખો.", introSolution: "આ સેટિંગ સમસ્યા માટે નીચે મુજબ ઉકેલ કરો.", selectedModel: "મોડલ", languageLabel: "ભાષા", selectedCrop: "પાક", selectedProblem: "જનરલ સેટિંગ સમસ્યા", fanPulleyGroove: "ફેન પુલી ગ્રુવ", sieveMesh: "ચારણા જાળી" },
+    hi: { modelTitle: "मॉडल चुनें", crop: "फसल चुनें", problem: "जनरल सेटिंग समस्या चुनें (वैकल्पिक)", button: "समाधान", back: "वापस जाएं", stop: "आवाज़ बंद करें", settingTitle: "फसल सेटिंग", solutionTitle: "समस्या का समाधान", languageName: "हिंदी", introSetting: "मार्शल थ्रेशर में आपके द्वारा चुनी गई फसल के लिए सेटिंग इस प्रकार रखें।", introSolution: "इस सेटिंग समस्या के लिए निम्न समाधान करें।", selectedModel: "मॉडल", languageLabel: "भाषा", selectedCrop: "फसल", selectedProblem: "सेटिंग समस्या", fanPulleyGroove: "फैन पुली ग्रूव", sieveMesh: "छलना जाली" },
+    en: { modelTitle: "Select Model", crop: "Select Crop", problem: "Select Problem (Optional)", button: "Get Solution", back: "Back", stop: "Stop Voice", settingTitle: "Crop Setting", solutionTitle: "Problem Solution", languageName: "English", introSetting: "In Marshal Thresher, keep the machine settings as follows.", introSolution: "For this problem, follow these solutions.", selectedModel: "Model", languageLabel: "Language", selectedCrop: "Crop", selectedProblem: "Problem", fanPulleyGroove: "Fan Pulley Groove", sieveMesh: "Sieve Mesh" }
+};
+
+const pulleyTranslations = {
+    en: { Large: "Large", Small: "Small", Big: "Big" },
+    hi: { Large: "बड़ी", Small: "छोटी", Big: "बड़ी" },
+    gu: { Large: "મોટી", Small: "નાની", Big: "મોટી" }
+};
+
+const machineLabels = {
+    gu: { operatingMode: "ઓપરેટિંગ મોડ", vBeltFront: "વી-બેલ્ટ (આગળ)", lowerPulley: "નીચેની પુલી", upperPulley: "ઉપરની પુલી", vBeltBack: "વી-બેલ્ટ (પાછળ)", fanPulleyGroove: "ફેન પુલી ગ્રુવ", lowerPulleyRotor: "નીચેની પુલી (રોટર)", upperPulleyRotor: "ઉપરની પુલી (રોટર)", lowerPulleyFan: "નીચેની પુલી (ફેન)", upperPulleyFan: "ઉપરની પુલી (ફેન)", sieveMesh: "ચારણા જાળી" },
+    hi: { operatingMode: "ऑपरेटिंग मोड", vBeltFront: "वी-बेल्ट (आगे)", lowerPulley: "नीचे की पुली", upperPulley: "ऊपर की पुली", vBeltBack: "वी-बेल्ट (पीछे)", fanPulleyGroove: "फैन पुली ग्रूव", lowerPulleyRotor: "नीचे की पुली (रोटर)", upperPulleyRotor: "ऊपर की पुली (रोटर)", lowerPulleyFan: "नीचे की पुली (फैन)", upperPulleyFan: "ऊपर की पुली (फैन)", sieveMesh: "छलना जाली" },
+    en: { operatingMode: "Operating Mode", vBeltFront: "V-Belt (Front)", lowerPulley: "Lower Pulley", upperPulley: "Upper Pulley", vBeltBack: "V-Belt (Back)", fanPulleyGroove: "Fan Pulley Groove", lowerPulleyRotor: "Lower Pulley (Rotor)", upperPulleyRotor: "Upper Pulley (Rotor)", lowerPulleyFan: "Lower Pulley (Fan)", upperPulleyFan: "Upper Pulley (Fan)", sieveMesh: "Sieve Mesh" }
+};
+
+// ====================== DOM & Listeners (unchanged) ======================
+let languageSelect, modelSelect, cropSelect, problemSelect, ukelBtn, backBtn, stopVoiceBtn;
+let modelBox, selectionBox, summaryBox, resultBox, actionButtons, languageBox;
+
+document.addEventListener("DOMContentLoaded", () => {
+    languageSelect = document.getElementById("languageSelect");
+    modelSelect    = document.getElementById("modelSelect");
+    cropSelect     = document.getElementById("cropSelect");
+    problemSelect  = document.getElementById("problemSelect");
+
+    modelBox      = document.getElementById("modelBox");
+    selectionBox  = document.getElementById("selectionBox");
+    summaryBox    = document.getElementById("summaryBox");
+    resultBox     = document.getElementById("resultBox");
+    actionButtons = document.getElementById("actionButtons");
+    languageBox   = document.getElementById("languageBox");
+
+    ukelBtn = document.getElementById("ukelBtn");
+    backBtn = document.getElementById("backBtn");
+    stopVoiceBtn = document.getElementById("stopVoiceBtn");
+
+    languageSelect.addEventListener("change", handleLanguageChange);
+    modelSelect.addEventListener("change", handleModelChange);
+    ukelBtn.addEventListener("click", getSolution);
+    backBtn.addEventListener("click", resetToInitialScreen);
+    stopVoiceBtn.addEventListener("click", () => speechSynthesis.cancel());
+});
+
+function handleLanguageChange() {
+    currentLang = languageSelect.value;
+    if (!currentLang) return;
+    modelBox.classList.remove("hidden");
+    selectionBox.classList.remove("hidden");
+    loadModels();
+    updateUIText();
+}
+
+function handleModelChange() {
+    selectedModel = modelSelect.value;
+    if (selectedModel) {
+        loadCrops();
+        loadProblems();
+    }
+}
+
+function updateUIText() {
+    const t = uiText[currentLang];
+    if (!t) return;
+    document.getElementById("modelTitle").innerText = t.modelTitle;
+    document.getElementById("cropTitle").innerText = t.crop;
+    document.getElementById("problemTitle").innerText = t.problem;
+    ukelBtn.innerText = t.button;
+    backBtn.innerText = t.back;
+    stopVoiceBtn.innerText = t.stop;
+}
+
+function loadModels() {
+    modelSelect.innerHTML = `<option value="">-- Select Model --</option>`;
+    Object.keys(models).forEach(key => {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = models[key].name[currentLang];
+        modelSelect.appendChild(opt);
+    });
+}
+
+function loadCrops() {
+    cropSelect.innerHTML = '<option value="">-- Select Crop --</option>';
+    if (!selectedModel || !currentLang) return;
+    const modelModes = models[selectedModel].modes || ["single"];
+    Object.keys(crops).forEach(key => {
+        if (!crops[key]?.[currentLang]) return;
+        const cropModes = crops[key].en?.modes || ["single"];
+        if (cropModes.some(m => modelModes.includes(m))) {
+            const opt = document.createElement("option");
+            opt.value = key;
+            opt.textContent = crops[key][currentLang].name;
+            cropSelect.appendChild(opt);
         }
-      },
-  
+    });
+}
+
+function loadProblems() {
+    problemSelect.innerHTML = '<option value="">-- Select Problem (Optional) --</option>';
+    if (!currentLang || !problems?.[currentLang]) return;
+    problems[currentLang].forEach((p, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = p.title;
+        problemSelect.appendChild(opt);
+    });
+}
+
+// ====================== SIEVE OVERRIDE HELPER ======================
+function getSimplifiedSieve(cropKey, lang) {
+    const crop = crops[cropKey];
+    if (!crop || !crop[lang]) return null;
+
+    // 1. Use manual override if provided
+    if (crop[lang].simplifiedSieve) {
+        return crop[lang].simplifiedSieve;
+    }
+
+    // 2. Auto extract Upper and Lower from full line
+    const data = crop[lang];
+    const sieveLine = data.settingsDisplay.find(line => 
+        line.includes("Sieve Mesh") || line.includes("ચારણા જાળી") || 
+        line.includes("छलना जाली") || line.includes("छलनी मेश")
+    );
+
+    if (!sieveLine) return null;
+
+    const upperMatch = sieveLine.match(/ઉપર|Upper|ऊपर\s*-\s*<b>(.*?)<\/b>/i);
+    const lowerMatch = sieveLine.match(/નીચે|Lower|नीचे\s*-\s*<b>(.*?)<\/b>/i);
+
+    const upperVal = upperMatch ? upperMatch[1] : "";
+    const lowerVal = lowerMatch ? lowerMatch[1] : "";
+
+    if (!upperVal || !lowerVal) return null;
+
+    return `Upper - <b>${upperVal}</b>, Lower - <b>${lowerVal}</b>`;
+}
+
+// ====================== generateSettings - FIXED SIEVE VOICE ======================
+function generateSettings(cropKey, lang, modelKey) {
+    const cropData = crops[cropKey]?.[lang];
+    if (!cropData) return { settings: ["Error"], voiceSettings: [], mode: "single" };
+
+    const model = models[modelKey];
+    const labels = machineLabels[lang] || machineLabels.en;
+    const trans = pulleyTranslations[lang] || pulleyTranslations.en;
+
+    const cropModes = crops[cropKey].en?.modes || ["single"];
+    let mode = (model.modes.includes("double") && cropModes.includes("double")) ? "double" : "single";
+
+    const modeText = mode === "double" 
+        ? (lang === "gu" ? "ડબલ શાફ્ટ" : lang === "hi" ? "डबल शाफ्ट" : "Double Shaft")
+        : (lang === "gu" ? "સિંગલ શાફ્ટ" : lang === "hi" ? "सिंगल शाफ्ट" : "Single Shaft");
+
+    let settings = [`${labels.operatingMode}: <b>${modeText}</b>`];
+    let voiceSettings = [`${labels.operatingMode} ${modeText}`];
+
+    // V-Belt Front
+    let vBeltFront = (model.type === "smart_double" && mode === "double") ? "5" : "3";
+    settings.push(`${labels.vBeltFront}: <b>${vBeltFront}</b>`);
+    voiceSettings.push(lang === "gu" ? `વી-બેલ્ટ આગળનું ${vBeltFront}` : 
+                       lang === "hi" ? `वी-बेल्ट आगे ${vBeltFront}` : 
+                       `V-belt front ${vBeltFront}`);
+
+// === Pulley Logic - FINAL (Double Shaft: Lower Small, Upper Large) ===
+    let fanGroove = mode === "single" ? "1" : "2";
+    if (cropKey === "castor_small" || cropKey === "castor_large") fanGroove = "3/4";
+
+    if (modelKey === "shahenshah" || 
+        (model.type === "standard_single") || 
+        (modelKey === "maharaja" && mode === "single")) {
+        
+        // Single Shaft Models
+        // Lower = Large, Upper = Small
+        settings.push(`${labels.lowerPulley}: <b>${trans.Large}</b>`);
+        settings.push(`${labels.upperPulley}: <b>${trans.Small}</b>`);
+        voiceSettings.push(`${labels.lowerPulley} ${trans.Large}`);
+        voiceSettings.push(`${labels.upperPulley} ${trans.Small}`);
+
+        if (modelKey === "maharaja") {
+            settings.push(`${labels.vBeltBack}: <b>1</b>`);
+            settings.push(`${labels.fanPulleyGroove}: <b>${fanGroove}</b>`);
+            voiceSettings.push(lang === "gu" ? `વી-બેલ્ટ પાછળનું 1` : lang === "hi" ? `वी-बेल्ट पीछे 1` : `V-belt back 1`);
+            voiceSettings.push(`${labels.fanPulleyGroove} ${fanGroove}`);
+        }
+    } 
+    else if (model.type === "smart_double") {
+        if (mode === "double") {
+            settings.push(`${labels.lowerPulleyRotor}: <b>${trans.Small}</b>`);
+            settings.push(`${labels.upperPulleyRotor}: <b>${trans.Big}</b>`);
+            settings.push(`${labels.lowerPulleyFan}: <b>${trans.Large}</b>`);
+            settings.push(`${labels.upperPulleyFan}: <b>${trans.Small}</b>`);
+            voiceSettings.push(`${labels.lowerPulleyRotor} ${trans.Small}`);
+            voiceSettings.push(`${labels.upperPulleyRotor} ${trans.Big}`);
+            voiceSettings.push(`${labels.lowerPulleyFan} ${trans.Large}`);
+            voiceSettings.push(`${labels.upperPulleyFan} ${trans.Small}`);
+        } else {
+            settings.push(`${labels.lowerPulley}: <b>${trans.Large}</b>`);
+            settings.push(`${labels.upperPulley}: <b>${trans.Small}</b>`);
+            voiceSettings.push(`${labels.lowerPulley} ${trans.Large}`);
+            voiceSettings.push(`${labels.upperPulley} ${trans.Small}`);
+        }
+    } 
+    else if (model.type === "maharaja" && mode === "double") {
+        // Maharaja Double Shaft - As per your latest requirement
+        settings.push(`${labels.lowerPulley}: <b>${trans.Small}</b>`);
+        settings.push(`${labels.upperPulley}: <b>${trans.Large}</b>`);
+        settings.push(`${labels.vBeltBack}: <b>1</b>`);
+        settings.push(`${labels.fanPulleyGroove}: <b>${fanGroove}</b>`);
+        
+        voiceSettings.push(`${labels.lowerPulley} ${trans.Small}`);
+        voiceSettings.push(`${labels.upperPulley} ${trans.Large}`);
+        voiceSettings.push(lang === "gu" ? `વી-બેલ્ટ પાછળનું 1` : lang === "hi" ? `वी-बेल्ट पीछे 1` : `V-belt back 1`);
+        voiceSettings.push(`${labels.fanPulleyGroove} ${fanGroove}`);
+    }
+    
+    // ====================== CUTTER + SIEVE - FIXED NATURAL VOICE ======================
+    const isPremiumModel = (modelKey === "shahenshah" || modelKey === "maharaja");
+    const cutterLine = cropData.settingsDisplay[0];
+
+    // Cutter
+    if (cutterLine) {
+        settings.push(cutterLine);
+        const cutterValue = cutterLine.match(/<b>(.*?)<\/b>/)?.[1] || "";
+        const cutterVoice = lang === "gu" ? `કટર ${cutterValue} રાખો` :
+                           lang === "hi" ? `कटर ${cutterValue} रखें` :
+                           `Set cutter at ${cutterValue}`;
+        voiceSettings.push(cutterVoice);
+    }
+
+    // ====================== SIEVE - Always Upper & Lower (All Languages) ======================
+    const sieveLine = cropData.settingsDisplay.find(line => 
+        line.includes("Sieve Mesh") || line.includes("ચારણા જાળી") || 
+        line.includes("छलना जाली") || line.includes("छलनी मेश")
+    );
+
+    if (sieveLine) {
+        if (isPremiumModel) {
+            // Maharaja & Shahenshah - Full 3 values
+            settings.push(sieveLine);
+            let fullText = sieveLine.replace(/<b>/g, '').replace(/<\/b>/g, '').trim();
+            fullText = fullText.replace("ચારણા જાળી:", "ચારણા જાળીમાં")
+                              .replace("छलना जाली:", "छलना जाली में")
+                              .replace("Sieve Mesh:", "Sieve mesh");
+            voiceSettings.push(fullText);
+        } else {
+            // === NON-PREMIUM - Always show as Upper & Lower ===
+            const pair = cropData.sievePair || "upper_lower";
+            let displaySieve = sieveLine;
+
+            if (pair === "upper_lower") {
+                displaySieve = sieveLine.replace(/વચ્ચે - <b>.*?<\/b>,?\s*/, "")
+                                       .replace(/बीच में - <b>.*?<\/b>,?\s*/, "")
+                                       .replace(/Middle - <b>.*?<\/b>,?\s*/, "");
+            } 
+            else if (pair === "upper_middle") {
+                // Upper + Middle → Show as Upper & Lower
+                displaySieve = sieveLine.replace(/નીચે - <b>.*?<\/b>/, "")
+                                       .replace(/नीचे - <b>.*?<\/b>/, "")
+                                       .replace(/Lower - <b>.*?<\/b>/, "")
+                                       .replace("Middle", "Lower")
+                                       .replace("વચ્ચે", "નીચે")           // Gujarati
+                                       .replace("बीच में", "नीचे");       // Hindi
+            } 
+            else if (pair === "middle_lower") {
+                // Middle + Lower → Show as Upper & Lower
+                displaySieve = sieveLine.replace(/ઉપર - <b>.*?<\/b>,?\s*/, "")
+                                       .replace(/ऊपर - <b>.*?<\/b>,?\s*/, "")
+                                       .replace(/Upper - <b>.*?<\/b>,?\s*/, "")
+                                       .replace("Middle", "Upper")
+                                       .replace("વચ્ચે", "ઉપર")           // Gujarati
+                                       .replace("बीच में", "ऊपर");        // Hindi
+            }
+
+            // Remove original label (prevents "ચારણા જાળી: ચારણા જાળી:")
+            displaySieve = displaySieve.replace(/^.*?(ચારણા જાળી|छलना जाली|Sieve Mesh|छलनी मेश)[:：]?\s*/i, "").trim();
+            displaySieve = displaySieve.replace(/,\s*$/, "");   // Remove trailing comma
+
+            // Final localization of Upper/Lower
+            if (lang === "gu") {
+                displaySieve = displaySieve.replace("Upper", "ઉપર").replace("Lower", "નીચે");
+            }
+            if (lang === "hi") {
+                displaySieve = displaySieve.replace("Upper", "ऊपर").replace("Lower", "नीचे");
+            }
+
+            settings.push(`${labels.sieveMesh}: ${displaySieve}`);
+
+            // Natural Voice
+            let cleanSieve = displaySieve.replace(/<b>/g, '').replace(/<\/b>/g, '').trim();
+            const sieveVoice = lang === "gu" ? `ચારણા જાળીમાં ${cleanSieve} રાખો` :
+                               lang === "hi" ? `छलना जाली में ${cleanSieve} रखें` :
+                               `Sieve mesh ${cleanSieve}`;
+            voiceSettings.push(sieveVoice);
+        }
+    }
+
+    // Remaining settings
+    const remaining = cropData.settingsDisplay.filter((_, i) => i !== 0);
+    settings = settings.concat(remaining.filter(line => 
+        !line.includes("Sieve Mesh") && !line.includes("ચારણા જાળી") && 
+        !line.includes("छलना जाली") && !line.includes("छलनी मेश")
+    ));
+
+    return { settings, voiceSettings, mode };
+}
+
+// ====================== GET SOLUTION ======================
+function getSolution() {
+    if (!currentLang) return alert("Please select language first");
+    if (!selectedModel) return alert("Please select model");
+    if (!cropSelect.value) return alert(currentLang === "gu" ? "પાક પસંદ કરો" : currentLang === "hi" ? "फसल चुनें" : "Please select crop");
+
+    const lang = currentLang;
+    const cropKey = cropSelect.value;
+    const problemIndex = problemSelect.value ? Number(problemSelect.value) : null;
+
+    const cropData = crops[cropKey]?.[lang];
+    const problemData = problemIndex !== null ? problems[lang]?.[problemIndex] : null;
+
+    if (!cropData) return alert("Crop data not found");
+
+    const { settings, voiceSettings } = generateSettings(cropKey, lang, selectedModel);
+
+    languageBox.classList.add("hidden");
+    modelBox.classList.add("hidden");
+    selectionBox.classList.add("hidden");
+
+    summaryBox.classList.remove("hidden");
+    resultBox.classList.remove("hidden");
+    actionButtons.classList.remove("hidden");
+
+    summaryBox.innerHTML = `
+        <h3>${uiText[lang].languageLabel}: ${uiText[lang].languageName}</h3>
+        <h3>${uiText[lang].selectedModel}: ${models[selectedModel].name[lang]}</h3>
+        <h3>${uiText[lang].selectedCrop}: ${cropData.name}</h3>
+        ${problemData ? `<h3>${uiText[lang].selectedProblem}: ${problemData.title}</h3>` : ''}
+    `;
+
+    resultBox.innerHTML = `
+        <h2>${uiText[lang].settingTitle}</h2>
+        <ul>${settings.map(s => `<li>${s}</li>`).join("")}</ul>
+        ${problemData ? `<h2 style="margin-top:30px;">${uiText[lang].solutionTitle}</h2><ul>${(problemData.solutionDisplay || []).map(s => `<li>${s}</li>`).join("")}</ul>` : ''}
+    `;
+
+    speakSolution(lang, voiceSettings, cropData.settingsSpeech || [], problemData ? problemData.solutionSpeech || [] : []);
+}
+
+function speakSolution(lang, machineVoiceSettings, cropSpeech, solutionSpeech) {
+    let text = (uiText[lang]?.introSetting || "") + " ";
+    machineVoiceSettings.forEach(line => text += line + ". ");
+    if (cropSpeech?.length) cropSpeech.forEach(line => { if (line) text += line + ". "; });
+    if (solutionSpeech?.length) {
+        text += (uiText[lang]?.introSolution || "") + " ";
+        solutionSpeech.forEach(s => { if (s) text += s + ". "; });
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text.trim());
+    utterance.lang = lang === "gu" ? "gu-IN" : lang + "-IN";
+    utterance.rate = 0.92;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+}
+
+function resetToInitialScreen() {
+    speechSynthesis.cancel();
+    summaryBox.classList.add("hidden");
+    resultBox.classList.add("hidden");
+    actionButtons.classList.add("hidden");
+    languageBox.classList.remove("hidden");
+    modelBox.classList.remove("hidden");
+    selectionBox.classList.remove("hidden");
+}
+
+// ====================== CROPS & PROBLEMS ======================
+
+
+const crops = {pearl_millet_g: {gu: {name: "બાજરી (G)",sievePair: "upper_lower",settingsDisplay:["કટર: <b>4</b>","ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>4</b>","સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>4</b>","રેત જાળી: <b>1.6</b>","હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>","ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>","ચારણાની ચાલ: <b>લાંબી</b>","ટ્રેક્ટરનો રેસ: <b>12</b>"],settingsSpeech:["સુપડી જાળી માં ઉપર ચાર અને નીચે ચાર રાખો","રેત જાળી એક દશાંશ છ રાખો","હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો","ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો","ચારણાની ચાલ લાંબી રાખો","ટ્રેક્ટરનો રેસ બાર રાખો"]},hi: {name: "बाजरा (G)",sievePair: "upper_lower",settingsDisplay:["कटर: <b>4</b>","छलना जाली:  ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>4</b>","सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>4</b>","रेत जाली: <b>1.6</b>","हवा का हैंडल: आगे का  - <b>बीच में</b>, पीछे का - <b>ऊपर</b>","चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>","छलने की चाल: <b>लंबी</b>","ट्रैक्टर का रेस: <b>12</b>"],settingsSpeech:["सुपड़ी जाली में ऊपर चार और नीचे चार रखें","रेत जाली एक दशमलव छह रखें","हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें","चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें","छलने की चाल लंबी रखें","ट्रैक्टर का रेस बारह रखें"]},en: {name: "Pearl Millet (G)",modes: ["single"],sievePair: "upper_lower",settingsDisplay:["Cutter: <b>4</b>","Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>4</b>","Winnowing Mesh: Upper - <b>4</b>, Lower - <b>4</b>","Sand Mesh: <b>1.6</b>","Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>","Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>","Sieve Movement: <b>Long</b>","Tractor Race: <b>12</b>"],settingsSpeech:["In the winnowing mesh, keep both upper and lower at four","Keep the sand mesh at one point six","Set the air handle with the front at middle and the rear at up","Set the chamber curtain with the side down and the rear at medium","Keep the sieve movement long","Keep the tractor RPM at twelve"]}},
+
 pearl_millet_r: {
   gu: {
     name: "બાજરી (R)",
+    sievePair: "upper_lower",
     settingsDisplay: [
-      "ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>",
       "કટર: <b>3.6</b>",
       "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>4</b>",
       "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
@@ -133,9 +410,6 @@ pearl_millet_r: {
       "ટ્રેક્ટરનો રેસ: <b>12</b>"
     ],
     settingsSpeech: [
-      "ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો",
-      "કટર ત્રણ દશાંશ છ રાખો",
-      "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે ચાર રાખો",
       "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
       "રેત જાળી એક દશાંશ છ રાખો",
       "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
@@ -146,11 +420,10 @@ pearl_millet_r: {
   },
   hi: {
     name: "बाजरा (R)",
+    sievePair: "upper_lower",
     settingsDisplay: [
-      "ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>",
       "कटर: <b>3.6</b>",
-      "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>4</b>",
-      "छलना जाली: ઉપર - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>4</b>",
+      "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>4</b>",
       "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
       "रेत जाली: <b>1.6</b>",
       "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
@@ -159,10 +432,6 @@ pearl_millet_r: {
       "ट्रैक्टर का रेस: <b>12</b>"
     ],
     settingsSpeech: [
-      "ऑपरेटिंग मोड सिंगल शाफ़्ट रखें",
-      "कटर तीन दशमलव छह रखें",
-      "छलना दो की जाली में ऊपर छह और नीचे चार रखें",
-      "छलने की जाली में ऊपर छह, बीच में पाँच दशमलव पाँच और नीचे चार रखें",
       "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
       "रेत जाली एक दशमलव छह रखें",
       "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
@@ -173,10 +442,10 @@ pearl_millet_r: {
   },
   en: {
     name: "Pearl Millet (R)",
+    modes: ["single"],
+    sievePair: "upper_lower",
     settingsDisplay: [
-      "Operating mode: <b>Single shaft</b>",
       "Cutter: <b>3.6</b>",
-      "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>4</b>",
       "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>4</b>",
       "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
       "Sand Mesh: <b>1.6</b>",
@@ -186,11 +455,7 @@ pearl_millet_r: {
       "Tractor Race: <b>12</b>"
     ],
     settingsSpeech: [
-      "Keep the operating mode on single shaft",
-      "Set the cutter on single shaft point six",
-      "In sieve two mesh, keep the upper at six and the lower at four",
-      "In sieve three mesh, keep the upper at six, the middle at five point five, and the lower at four",
-      "In the winnowing mesh, keep the upper at four and the lower on single shaft",
+      "In the winnowing mesh, keep the upper at four and the lower at three",
       "Keep the sand mesh at one point six",
       "Set the air handle with the front at middle and the rear at up",
       "Set the chamber curtain with the side down and the rear at medium",
@@ -199,14 +464,12 @@ pearl_millet_r: {
     ]
   }
 },
-
 wheat: {
   gu: {
     name: "ઘઉં",
+    sievePair: "middle_lower",
     settingsDisplay: [
-      "ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>",
       "કટર: <b>7.5</b>",
-      "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>",
       "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>",
       "સુપડી જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5.5</b>",
       "રેત જાળી: <b>3</b>",
@@ -216,10 +479,6 @@ wheat: {
       "ટ્રેક્ટરનો રેસ: <b>14</b>"
     ],
     settingsSpeech: [
-      "ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો",
-      "કટર સાત દશાંશ પાંચ રાખો",
-      "ચારણા બે ની જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
-      "ચારણાની જાળી માં ઉપર સાત, વચ્ચે છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
       "સુપડી જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પણ પાંચ દશાંશ પાંચ રાખો",
       "રેત જાળી ત્રણ રાખો",
       "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
@@ -230,10 +489,9 @@ wheat: {
   },
   hi: {
     name: "गेहूं",
+    sievePair: "middle_lower",
     settingsDisplay: [
-      "ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>",
       "कटर: <b>7.5</b>",
-      "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>",
       "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>",
       "सुपड़ी जाली: ऊपर - <b>5.5</b>, नीचे - <b>5.5</b>",
       "रेत जाली: <b>3</b>",
@@ -243,10 +501,6 @@ wheat: {
       "ट्रैक्टर का रेस: <b>14</b>"
     ],
     settingsSpeech: [
-      "ऑपरेटिंग मोड सिंगल शाफ़्ट रखें",
-      "कटर सात दशमलव पाँच रखें",
-      "छलना दो की जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें",
-      "छलने की जाली में ऊपर सात, बीच में छह और नीचे पाँच दशमलव पाँच रखें",
       "सुपड़ी जाली में ऊपर पाँच दशमलव पाँच और नीचे भी पाँच दशमलव पाँच रखें",
       "रेत जाली तीन रखें",
       "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
@@ -257,10 +511,10 @@ wheat: {
   },
   en: {
     name: "Wheat",
+    modes: ["single"],
+    sievePair: "middle_lower",
     settingsDisplay: [
-      "Operating mode: <b>Single shaft</b>",
       "Cutter: <b>7.5</b>",
-      "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>",
       "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>",
       "Winnowing Mesh: Upper - <b>5.5</b>, Lower - <b>5.5</b>",
       "Sand Mesh: <b>3</b>",
@@ -270,12 +524,8 @@ wheat: {
       "Tractor Race: <b>14</b>"
     ],
     settingsSpeech: [
-      "Keep the operating mode on single shaft",
-      "Set the cutter at seven point five",
-      "In sieve two mesh, keep the upper at six and the lower at five point five",
-      "In sieve three mesh, keep the upper at seven, the middle at six, and the lower at five point five",
       "In the winnowing mesh, keep both upper and lower at five point five",
-      "Keep the sand mesh on single shaft",
+      "Keep the sand mesh at three",
       "Set the air handle with the front at middle and the rear at up",
       "Set the chamber curtain with the side down and the rear at medium",
       "Keep the sieve movement short",
@@ -283,1057 +533,2394 @@ wheat: {
     ]
   }
 },
-  
-  wheat_bhalia: {
-    gu: {
-      name: "ઘઉં (ભાલિયા)",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા જાળી: ઉપર - <b>8</b>, વચ્ચે - <b>7</b>, નીચે - <b>6</b>", "સુપડી જાળી: ઉપર - <b>9</b>, નીચે - <b>8</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>ટૂંકી</b>", "ટ્રેક્ટરનો રેસ: <b>14</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણાની જાળી માં ઉપર આઠ, વચ્ચે સાત અને નીચે છ રાખો", "સુપડી જાળી માં ઉપર નવ અને નીચે આઠ રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ ટૂંકી રાખો", "ટ્રેક્ટરનો રેસ ચૌદ રાખો"]
-    },
-    hi: {
-      name: "गेहूं (भालिया)",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना जाली: ऊपर - <b>8</b>, बीच में - <b>7</b>, नीचे - <b>6</b>", "सुपड़ी जाली: ऊपर - <b>9</b>, नीचे - <b>8</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>टूंकी</b>", "ट्रैक्टर का रेस: <b>14</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलने की जाली में ऊपर आठ, बीच में सात और नीचे छह रखें", "सुपड़ी जाली में ऊपर नौ और नीचे आठ रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल टूंकी रखें", "ट्रैक्टर का रेस चौदह रखें"]
-    },
-    en: {
-      name: "Wheat (Bhalia)",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sieve Mesh: Upper - <b>8</b>, Middle - <b>7</b>, Lower - <b>6</b>", "Winnowing Mesh: Upper - <b>9</b>, Lower - <b>8</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Short</b>", "Tractor Race: <b>14</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at eight and lower at seven", "In sieve three mesh, keep upper at eight, middle at seven, and lower at six", "In winnowing mesh, keep upper at nine and lower at eight", "Keep sand mesh on single shaft", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement short", "Keep tractor RPM at fourteen"]
-    }
+
+wheat_bhalia: {
+  gu: {
+    name: "ઘઉં (ભાલિયા)",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>8</b>, વચ્ચે - <b>7</b>, નીચે - <b>6</b>",
+      "સુપડી જાળી: ઉપર - <b>9</b>, નીચે - <b>8</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>ટૂંકી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>14</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર નવ અને નીચે આઠ રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ ટૂંકી રાખો",
+      "ટ્રેક્ટરનો રેસ ચૌદ રાખો"
+    ]
   },
-  mustard: {
-    gu: {
-      name: "રાયડો",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>4</b>", "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>4</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>4</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>13</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર છ અને નીચે ચાર રાખો", "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે ચાર રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ચાર રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ તેર રાખો"]
-    },
-    hi: {
-      name: "रायड़ा / सरसव",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>4</b>", "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>4</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>4</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>13</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर छह और नीचे चार रखें", "छलने की जाली में ऊपर छह, बीच में पाँच दशमलव पाँच और नीचे चार रखें", "सुपड़ी जाली में ऊपर चार और नीचे चार रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस तेरह रखें"]
-    },
-    en: {
-      name: "Mustard",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>4</b>", "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>4</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>4</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>13</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at six and lower at four", "In sieve three mesh, keep upper at six, middle at five point five, and lower at four", "In winnowing mesh, keep upper at four and lower at four", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at thirteen"]
-    }
+  hi: {
+    name: "गेहूं (भालिया)",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>8</b>, बीच में - <b>7</b>, नीचे - <b>6</b>",
+      "सुपड़ी जाली: ऊपर - <b>9</b>, नीचे - <b>8</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>टूंकी</b>",
+      "ट्रैक्टर का रेस: <b>14</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर नौ और नीचे आठ रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल टूंकी रखें",
+      "ट्रैक्टर का रेस चौदह रखें"
+    ]
   },
-  sorghum_small: {
-    gu: {
-      name: "જુવાર (નાની)",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>6</b>", "ચારણા 2 જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5</b>", "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>", "સુપડી જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર છ રાખો", "ચારણા બે ની જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "સુપડી જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પણ પાંચ દશાંશ પાંચ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "जवार (छोटी)",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>6</b>", "छलना 2 जाली: ऊपर - <b>5.5</b>, नीचे - <b>5</b>", "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>", "सुपड़ी जाली: ऊपर - <b>5.5</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर छह रखें", "छलना दो की जाली में ऊपर पाँच दशमलव पाँच और नीचे पाँच रखें", "छलने की जाली में ऊपर छह, बीच में पाँच दशमलव पाँच और नीचे पाँच रखें", "सुपड़ी जाली में ऊपर पाँच दशमलव पाँच और नीचे भी पाँच दशमलव पाँच रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Sorghum (Small)",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>6</b>", "Sieve 2 Mesh: Upper - <b>5.5</b>, Lower - <b>5</b>", "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>", "Winnowing Mesh: Upper - <b>5.5</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at six", "In sieve two mesh, keep upper at five point five and lower at five", "In sieve three mesh, keep upper at six, middle at five point five, and lower at five", "In winnowing mesh, keep upper and lower at five point five", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  sorghum_large: {
-    gu: {
-      name: "જુવાર (મોટી)",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>", "ચારણા જાળી: ઉપર - <b>9</b>, વચ્ચે - <b>8</b>, નીચે - <b>7</b>", "સુપડી જાળી: ઉપર - <b>9</b>, નીચે - <b>8</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર આઠ દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર આઠ અને નીચે સાત રાખો", "ચારણાની જાળી માં ઉપર નવ, વચ્ચે આઠ અને નીચે સાત રાખો", "સુપડી જાળી માં ઉપર નવ અને નીચે આઠ રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "जवार (बड़ी)",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>", "छलना जाली: ऊपर - <b>9</b>, बीच में - <b>8</b>, नीचे - <b>7</b>", "सुपड़ी जाली: ऊपर - <b>9</b>, नीचे - <b>8</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर आठ दशमलव पाँच रखें", "छलना दो की जाली में ऊपर आठ और नीचे सात रखें", "छलने की जाली में ऊपर नौ, बीच में आठ और नीचे सात रखें", "सुपड़ी जाली में ऊपर नौ और नीचे आठ रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Sorghum (Large)",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sieve Mesh: Upper - <b>9</b>, Middle - <b>8</b>, Lower - <b>7</b>", "Winnowing Mesh: Upper - <b>9</b>, Lower - <b>8</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at eight and lower at seven", "In sieve three mesh, keep upper at nine, middle at eight, and lower at seven", "In winnowing mesh, keep upper at nine and lower at eight", "Keep sand mesh on single shaft", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  guar: {
-    gu: {
-      name: "ગુવાર",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5</b>", "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>", "સુપડી જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>ઉપર</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>13</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "સુપડી જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પણ પાંચ દશાંશ પાંચ રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું ઉપર અને પાછળનું પણ ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ તેર રાખો"]
-    },
-    hi: {
-      name: "गुवार",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>5.5</b>, नीचे - <b>5</b>", "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>", "सुपड़ी जाली: ऊपर - <b>5.5</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>ऊपर</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>13</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर पाँच दशमलव पाँच और नीचे पाँच रखें", "छलने की जाली में ऊपर छह, बीच में पाँच दशमलव पाँच और नीचे पाँच रखें", "सुपड़ी जाली में ऊपर पाँच दशमलव पाँच और नीचे भी पाँच दशमलव पाँच रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला ऊपर और पीछे वाला भी ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस तेरह रखें"]
-    },
-    en: {
-      name: "Guar",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>5.5</b>, Lower - <b>5</b>", "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>", "Winnowing Mesh: Upper - <b>5.5</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Up</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>13</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at five point five and lower at five", "In sieve three mesh, keep upper at six, middle at five point five, and lower at five", "In winnowing mesh, keep upper and lower at five point five", "Keep sand mesh on single shaft", "Set air handle front to up and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at thirteen"]
-    }
-  },
-  cumin: {
-    gu: {
-      name: "જીરું",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>", "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો", "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "जीरा",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>", "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें", "छलने की जाली में ऊपर छह, बीच में पाँच दशमलव पाँच और नीचे पाँच रखें", "सुपड़ी जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Cumin",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>", "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at six and lower at five point five", "In sieve three mesh, keep upper at six, middle at five point five, and lower at five", "In winnowing mesh, keep upper at six and lower at five point five", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  fennel: {
-    gu: {
-      name: "વરિયાળી",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>", "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો", "ચારણાની જાળી માં ઉપર સાત, વચ્ચે છ અને નીચે પાંચ દશાંશ પાંચ રાખો", "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "सौंफ",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>", "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें", "छलने की जाली में ऊपर सात, बीच में छह और नीचे पाँच दशमलव पाँच रखें", "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Fennel",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>", "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at six and lower at five point five", "In sieve three mesh, keep upper at seven, middle at six, and lower at five point five", "In winnowing mesh, keep upper at eight and lower at seven", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  psyllium: {
-    gu: {
-      name: "ઇસબગુલ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>6</b>", "ચારણા 2 જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3/2.5</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર છ રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "ચારણાની જાળી માં ઉપર ચાર દશાંશ પાંચ, વચ્ચે ચાર અને નીચે ત્રણ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ અથવા બે દશાંશ પાંચ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "इसबगोल",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>6</b>", "छलना 2 जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3/2.5</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर छह रखें", "छलना दो की जाली में ऊपर चार और नीचे तीन रखें", "छलने की जाली में ऊपर चार दशमलव पाँच, बीच में चार और नीचे तीन रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन या दो दशमलव पाँच रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Psyllium",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>6</b>", "Sieve 2 Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3/2.5</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at six", "In sieve two mesh, keep upper at four and lower on single shaft", "In sieve three mesh, keep upper at four point five, middle at four, and lower on single shaft", "In winnowing mesh, keep upper at four and lower on single shaft or two point five", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  amaranth: {
-    gu: {
-      name: "રાજગરો",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>3</b>, નીચે - <b>1.6</b>", "ચારણા જાળી: ઉપર - <b>4</b>, વચ્ચે - <b>3</b>, નીચે - <b>1.6</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "રેત જાળી: <b>પતરું</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર ત્રણ અને નીચે એક દશાંશ છ રાખો", "ચારણાની જાળી માં ઉપર ચાર, વચ્ચે ત્રણ અને નીચે એક દશાંશ છ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "રેત જાળી માં પતરું રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "राजगिरा",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>3</b>, नीचे - <b>1.6</b>", "छलना जाली: ऊपर - <b>4</b>, बीच में - <b>3</b>, नीचे - <b>1.6</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "रेत जाली: <b>चद्दर</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर तीन और नीचे एक दशमलव छह रखें", "छलने की जाली में ऊपर चार, बीच में तीन और नीचे एक दशमलव छह रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें", "रेत जाली की जगह चद्दर का उपयोग करें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Amaranth",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>3</b>, Lower - <b>1.6</b>", "Sieve Mesh: Upper - <b>4</b>, Middle - <b>3</b>, Lower - <b>1.6</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sand Mesh: <b>Sheet</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper on single shaft and lower at one point six", "In sieve three mesh, keep upper at four, middle on single shaft, and lower at one point six", "In winnowing mesh, keep upper at four and lower on single shaft", "Use a metal sheet for sand mesh", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  ajwain: {
-    gu: {
-      name: "અજમો",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>4.5</b>, નીચે - <b>4</b>", "ચારણા જાળી: ઉપર - <b>5</b>, વચ્ચે - <b>4.5</b>, નીચે - <b>4</b>", "સુપડી જાળી: ઉપર - <b>5</b>, નીચે - <b>4.5</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર દશાંશ પાંચ અને નીચે ચાર રાખો", "ચારણાની જાળી માં ઉપર પાંચ, વચ્ચે ચાર દશાંશ પાંચ અને નીચે ચાર રાખો", "સુપડી જાળી માં ઉપર પાંચ અને નીચે ચાર દશાંશ પાંચ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "अजवायन",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>4.5</b>, नीचे - <b>4</b>", "छलना जाली: ऊपर - <b>5</b>, बीच में - <b>4.5</b>, नीचे - <b>4</b>", "सुपड़ी जाली: ऊपर - <b>5</b>, नीचे - <b>4.5</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर साढ़े चार और नीचे चार रखें", "छलने की जाली में ऊपर पाँच, बीच में साढ़े चार और नीचे चार रखें", "सुपड़ी जाली में ऊपर पाँच और नीचे साढ़े चार रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Ajwain",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>4.5</b>, Lower - <b>4</b>", "Sieve Mesh: Upper - <b>5</b>, Middle - <b>4.5</b>, Lower - <b>4</b>", "Winnowing Mesh: Upper - <b>5</b>, Lower - <b>4.5</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at four point five and lower at four", "In sieve three mesh, keep upper at five, middle at four point five, and lower at four", "In winnowing mesh, keep upper at five and lower at four point five", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  dill: {
-    gu: {
-      name: "સુવા",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5</b>", "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>", "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "सुवा",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>5.5</b>, नीचे - <b>5</b>", "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>", "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर साढ़े पाँच और नीचे पाँच रखें", "छलने की जाली में ऊपर छह, बीच में साढ़े पाँच और नीचे पाँच रखें", "सुपड़ी जाલી में ऊपर छह और नीचे साढ़े पाँच रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Dill",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>5.5</b>, Lower - <b>5</b>", "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>", "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at five point five and lower at five", "In sieve three mesh, keep upper at six, middle at five point five, and lower at five", "In winnowing mesh, keep upper at six and lower at five point five", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  fenugreek: {
-    gu: {
-      name: "મેથી",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5</b>", "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>", "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "ચારણાની જાળી માં ઉપર છ, વચ્ચે પાંચ દશાંશ પાંચ અને નીચે પાંચ રાખો", "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "मेथी",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>5.5</b>, नीचे - <b>5</b>", "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>", "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर साढ़े पाँच और नीचे पाँच रखें", "छलने की जाली में ऊपर छह, बीच में साढ़े पाँच और नीचे पाँच रखें", "सुपड़ी जाली में ऊपर छह और नीचे साढ़े पाँच रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Fenugreek",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>5.5</b>, Lower - <b>5</b>", "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>", "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at five point five and lower at five", "In sieve three mesh, keep upper at six, middle at five point five, and lower at five", "In winnowing mesh, keep upper at six and lower at five point five", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  radish_seed: {
-    gu: {
-      name: "રજકો",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "ચારણાની જાળી માં ઉપર ચાર દશાંશ પાંચ, વચ્ચે ચાર અને નીચે ત્રણ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "रजका",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर चार और नीचे तीन रखें", "छलने की जाली में ऊपर साढ़े चार, बीच में चार और नीचे तीन रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Radish Seed",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at four and lower on single shaft", "In sieve three mesh, keep upper at four point five, middle at four, and lower on single shaft", "In winnowing mesh, keep upper at four and lower on single shaft", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  chicory: {
-    gu: {
-      name: "ચીકોરી",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાત દશાંશ પાંચ રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "ચારણાની જાળી માં ઉપર ચાર દશાંશ પાંચ, વચ્ચે ચાર અને નીચે ત્રણ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "चिकोरी",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर सात दशमलव पाँच रखें", "छलना दो की जाली में ऊपर चार और नीचे तीन रखें", "छलने की जाली में ऊपर साढ़े चार, बीच में चार और नीचे तीन रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Chicory",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at four and lower on single shaft", "In sieve three mesh, keep upper at four point five, middle at four, and lower on single shaft", "In winnowing mesh, keep upper at four and lower on single shaft", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  onion_seed: {
-    gu: {
-      name: "ડુંગળી નું બી",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાડા સાત રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "ચારણાની જાળી માં ઉપર સાડા ચાર, વચ્ચે ચાર અને નીચે ત્રણ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "प्याज का बीज",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर साढ़े सात रखें", "छलना दो की जाली में ऊपर चार और नीचे तीन रखें", "छलने की जाली में ऊपर साढ़े चार, बीच में चार और नीचे तीन रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Onion Seed",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at four and lower on single shaft", "In sieve three mesh, keep upper at four point five, middle at four, and lower on single shaft", "In winnowing mesh, keep upper at four and lower on single shaft", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  taramira: {
-    gu: {
-      name: "તારામેરા",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાડા સાત રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "ચારણાની જાળી માં ઉપર સાડા ચાર, વચ્ચે ચાર અને નીચે ત્રણ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "तारामीरा",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर साढ़े सात रखें", "छलना दो की जाली में ऊपर चार और नीचे तीन रखें", "छलने की जाली में ऊपर साढ़े चार, बीच में चार और नीचे तीन रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Taramira",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at four and lower on single shaft", "In sieve three mesh, keep upper at four point five, middle at four, and lower on single shaft", "In winnowing mesh, keep upper at four and lower on single shaft", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  linseed: {
-    gu: {
-      name: "અસારીયો",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાડા સાત રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "ચારણાની જાળી માં ઉપર સાડા ચાર, વચ્ચે ચાર અને નીચે ત્રણ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "असारिया",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर साढ़े सात रखें", "छलना दो की जाली में ऊपर चार और नीचे तीन रखें", "छलने की जाली में ऊपर साढ़े चार, बीच में चार और नीचे तीन रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Linseed",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at four and lower on single shaft", "In sieve three mesh, keep upper at four point five, middle at four, and lower on single shaft", "In winnowing mesh, keep upper at four and lower on single shaft", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  barley: {
-    gu: {
-      name: "જવ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>7</b>, નીચે - <b>6</b>", "ચારણા જાળી: ઉપર - <b>8</b>, વચ્ચે - <b>7</b>, નીચે - <b>6</b>", "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાડા સાત રાખો", "ચારણા બે ની જાળી માં ઉપર સાત અને નીચે છ રાખો", "ચારણાની જાળી માં ઉપર આઠ, વચ્ચે સાત અને નીચે છ રાખો", "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "जव",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>7</b>, नीचे - <b>6</b>", "छलना जाली: ऊपर - <b>8</b>, बीच में - <b>7</b>, नीचे - <b>6</b>", "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर साढ़े सात रखें", "छलना दो की जाली में ऊपर सात और नीचे छह रखें", "छलने की जाली में ऊपर आठ, बीच में सात और नीचे छह रखें", "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Barley",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>7</b>, Lower - <b>6</b>", "Sieve Mesh: Upper - <b>8</b>, Middle - <b>7</b>, Lower - <b>6</b>", "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at seven and lower at six", "In sieve three mesh, keep upper at eight, middle at seven, and lower at six", "In winnowing mesh, keep upper at eight and lower at seven", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  sesame: {
-    gu: {
-      name: "તલ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>સિંગલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા 2 જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>", "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ સિંગલ શાફ્ટ રાખો", "કટર સાડા સાત રાખો", "ચારણા બે ની જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "ચારણાની જાળી માં ઉપર સાડા ચાર, વચ્ચે ચાર અને નીચે ત્રણ રાખો", "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "तिल",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>सिंगल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना 2 जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>", "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>", "रेत जाली: <b>1.6</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छલને की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड सिंगल शाफ़्ट रखें", "कटर साढ़े सात रखें", "छलना दो की जाली में ऊपर चार और नीचे तीन रखें", "छलने की जाली में ऊपर साढ़े चार, बीच में चार और नीचे तीन रखें", "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें", "रेत जाली एक दशमलव छह रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Sesame",
-      settingsDisplay: ["Operating mode: <b>Single shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>", "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on single shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at four and lower on single shaft", "In sieve three mesh, keep upper at four point five, middle at four, and lower on single shaft", "In winnowing mesh, keep upper at four and lower on single shaft", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  green_gram: {
-    gu: {
-      name: "મગ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>", "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર છ અને નીચે સાડા પાંચ રાખો", "ચારણાની જાળી માં ઉપર સાત, વચ્ચે છ અને નીચે સાડા પાંચ રાખો", "સુપડી જાળી માં ઉપર છ અને નીચે સાડા પાંચ રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "मूंग",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>", "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर छह और नीचे साढ़े पांच रखें", "छलने की जाली में ऊपर सात, बीच में छह और नीचे साढ़े पांच रखें", "सुपड़ी जाली में ऊपर छह और नीचे साढ़े पांच रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Green Gram",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>", "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at six and lower at five point five", "In sieve three mesh, keep upper at seven, middle at six, and lower at five point five", "In winnowing mesh, keep upper at six and lower at five point five", "Keep sand mesh on single shaft", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  moth_bean: {
-    gu: {
-      name: "મઠ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>", "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર છ અને નીચે સાડા પાંચ રાખો", "ચારણાની જાળી માં ઉપર સાત, વચ્ચે છ અને નીચે સાડા પાંચ રાખો", "સુપડી જાળી માં ઉપર છ અને નીચે સાડા પાંચ રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "मोठ",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>", "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर छह और नीचे साढ़े पांच रखें", "छलने की जाली में ऊपर सात, बीच में छह और नीचे साढ़े पांच रखें", "सुपड़ी जाली में ऊपर छह और नीचे साढ़े पांच रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Moth Bean",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>", "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at six and lower at five point five", "In sieve three mesh, keep upper at seven, middle at six, and lower at five point five", "In winnowing mesh, keep upper at six and lower at five point five", "Keep sand mesh on single shaft", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  black_gram: {
-    gu: {
-      name: "અડદ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>", "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર છ અને નીચે સાડા પાંચ રાખો", "ચારણાની જાળી માં ઉપર સાત, વચ્ચે છ અને નીચે સાડા પાંચ રાખો", "સુપડી જાળી માં ઉપર છ અને નીચે સાડા પાંચ રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "उड़द",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>", "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर छह और नीचे साढ़े पांच रखें", "छलने की जाली में ऊपर सात, बीच में छह और नीचे साढ़े पांच रखें", "सुपड़ी जाली में ऊपर छह और नीचे साढ़े पांच रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Black Gram",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>", "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at six and lower at five point five", "In sieve three mesh, keep upper at seven, middle at six, and lower at five point five", "In winnowing mesh, keep upper at six and lower at five point five", "Keep sand mesh on single shaft", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  cowpea: {
-    gu: {
-      name: "ચોળી",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>7</b>, નીચે - <b>6</b>", "ચારણા જાળી: ઉપર - <b>8</b>, વચ્ચે - <b>7</b>, નીચે - <b>6</b>", "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર સાત અને નીચે છ રાખો", "ચારણાની જાળી માં ઉપર આઠ, વચ્ચે સાત અને નીચે છ રાખો", "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "चोली",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>7</b>, नीचे - <b>6</b>", "छलना जाली: ऊपर - <b>8</b>, बीच में - <b>7</b>, नीचे - <b>6</b>", "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर सात और नीचे छह रखें", "छलने की जाली में ऊपर आठ, बीच में सात और नीचे छह रखें", "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Cowpea",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>7</b>, Lower - <b>6</b>", "Sieve Mesh: Upper - <b>8</b>, Middle - <b>7</b>, Lower - <b>6</b>", "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at seven and lower at six", "In sieve three mesh, keep upper at eight, middle at seven, and lower at six", "In winnowing mesh, keep upper at eight and lower at seven", "Keep sand mesh on single shaft", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  pigeon_pea: {
-    gu: {
-      name: "તુવેર",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>10</b>, નીચે - <b>9</b>", "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>", "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર દસ અને નીચે નવ રાખો", "ચારણાની જાળી માં ઉપર અગિયાર, વચ્ચે દસ અને નીચે નવ રાખો", "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "तुअर",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>10</b>, नीचे - <b>9</b>", "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>", "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर दस और नीचे नौ रखें", "छलने की जाली में ऊपर ग्यारह, बीच में दस और नीचे नौ रखें", "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Pigeon Pea",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>10</b>, Lower - <b>9</b>", "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>", "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at ten and lower at nine", "In sieve three mesh, keep upper at eleven, middle at ten, and lower at nine", "In winnowing mesh, keep upper at eleven and lower at ten", "Keep sand mesh at five", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  chickpea_desi: {
-    gu: {
-      name: "ચણા (દેશી)",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>10</b>, નીચે - <b>9</b>", "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>", "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર દસ અને નીચે નવ રાખો", "ચારણાની જાળી માં ઉપર અગિયાર, વચ્ચે દસ અને નીચે નવ રાખો", "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "चना (देशी)",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>10</b>, नीचे - <b>9</b>", "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>", "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर दस और नीचे नौ रखें", "छलने की जाली में ऊपर ग्यारह, बीच में दस और नीचे नौ रखें", "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Chickpea (Desi)",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>10</b>, Lower - <b>9</b>", "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>", "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at ten and lower at nine", "In sieve three mesh, keep upper at eleven, middle at ten, and lower at nine", "In winnowing mesh, keep upper at eleven and lower at ten", "Keep sand mesh at five", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  lentil: {
-    gu: {
-      name: "ચણા (કાબુલી)",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>9.5</b>", "ચારણા 2 જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>", "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>", "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા નવ રાખો", "ચારણા બે ની જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો", "ચારણાની જાળી માં ઉપર બાર, વચ્ચે અગિયાર અને નીચે દસ રાખો", "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "चना (काबुली)",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>9.5</b>", "छलना 2 जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>", "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>", "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े नौ रखें", "छलना दो की जाली में ऊपर बारह और नीचे ग्यारह रखें", "छलने की जाली में ऊपर बारह, बीच में ग्यारह और नीचे दस रखें", "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Chickpea (Kabuli)",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>9.5</b>", "Sieve 2 Mesh: Upper - <b>12</b>, Lower - <b>11</b>", "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>", "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at nine point five", "In sieve two mesh, keep upper at twelve and lower at eleven", "In sieve three mesh, keep upper at twelve, middle at eleven, and lower at ten", "In winnowing mesh, keep upper at twelve and lower at eleven", "Keep sand mesh at five", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  soyabean: {
-    gu: {
-      name: "સોયાબીન",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>10</b>, નીચે - <b>9</b>", "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>", "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર દસ અને નીચે નવ રાખો", "ચારણાની જાળી માં ઉપર અગિયાર, વચ્ચે દસ અને નીચે નવ રાખો", "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "सोयाबीन",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>10</b>, नीचे - <b>9</b>", "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>", "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर दस और नीचे नौ रखें", "छलने की जाली में ऊपर ग्यारह, बीच में दस और नीचे नौ रखें", "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Soyabean",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>10</b>, Lower - <b>9</b>", "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>", "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at ten and lower at nine", "In sieve three mesh, keep upper at eleven, middle at ten, and lower at nine", "In winnowing mesh, keep upper at eleven and lower at ten", "Keep sand mesh at five", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  vaal: {
-    gu: {
-      name: "વાલ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>9.5</b>", "ચારણા 2 જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>", "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>", "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા નવ રાખો", "ચારણા બે ની જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો", "ચારણાની જાળી માં ઉપર બાર, વચ્ચે અગિયાર અને નીચે દસ રાખો", "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "वाल",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>9.5</b>", "छलना 2 जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>", "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>", "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊપર</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े नौ रखें", "छलना दो की जाली में ऊपर बारह और नीचे ग्यारह रखें", "छलने की जाली में ऊपर बारह, बीच में ग्यारह और नीचे दस रखें", "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Hyacinth Bean",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>9.5</b>", "Sieve 2 Mesh: Upper - <b>12</b>, Lower - <b>11</b>", "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>", "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at nine point five", "In sieve two mesh, keep upper at twelve and lower at eleven", "In sieve three mesh, keep upper at twelve, middle at eleven, and lower at ten", "In winnowing mesh, keep upper at twelve and lower at eleven", "Keep sand mesh at five", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  coriander: {
-    gu: {
-      name: "ધાણા",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>8.5</b>", "ચારણા 2 જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>", "ચારણા જાળી: ઉપર - <b>9</b>, વચ્ચે - <b>8</b>, નીચે - <b>7</b>", "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>", "રેત જાળી: <b>3</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>10</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા આઠ રાખો", "ચારણા બે ની જાળી માં ઉપર આઠ અને નીચે સાત રાખો", "ચારણાની જાળી માં ઉપર નવ, વચ્ચે આઠ અને નીચે સાત રાખો", "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો", "રેત જાળી ત્રણ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ દસ રાખો"]
-    },
-    hi: {
-      name: "धनिया",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>5</b>", "कटर: <b>8.5</b>", "छलना 2 जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>", "छलना जाली: ऊपर - <b>9</b>, बीच में - <b>8</b>, नीचे - <b>7</b>", "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>", "रेत जाली: <b>3</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>10</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े आठ रखें", "छलना दो की जाली में ऊपर आठ और नीचे सात रखें", "छलने की जाली में ऊपर नौ, बीच में आठ और नीचे सात रखें", "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें", "रेत जाली तीन रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस दस रखें"]
-    },
-    en: {
-      name: "Coriander",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>8.5</b>", "Sieve 2 Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sieve Mesh: Upper - <b>9</b>, Middle - <b>8</b>, Lower - <b>7</b>", "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sand Mesh: <b>3</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>10</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at eight point five", "In sieve two mesh, keep upper at eight and lower at seven", "In sieve three mesh, keep upper at nine, middle at eight, and lower at seven", "In winnowing mesh, keep upper at eight and lower at seven", "Keep sand mesh on single shaft", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at ten"]
-    }
-  },
-  castor_small: {
-    gu: {
-      name: "એરંડા (નાના)",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>7</b>", "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>", "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>ઉપર</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>10</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાત રાખો", "ચારણાની જાળી માં ઉપર અગિયાર, વચ્ચે દસ અને નીચે નવ રાખો", "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું ઉપર અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ દસ રાખો"]
-    },
-    hi: {
-      name: "अरंडी (छोटी)",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>डबल शाफ़्ट</b>", "कटर: <b>7</b>", "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>", "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>ऊपर</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>10</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर सात रखें", "छलने की जाली में ऊपर ग्यारह, बीच में दस और नीचे नौ रखें", "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला ऊपर और पीछे वाला भी ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस दस रखें"]
-    },
-    en: {
-      name: "Castor (Small)",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>7</b>", "Sieve 2 Mesh: Upper - <b>11</b>, Lower - <b>9</b>", "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>", "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Up</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>10</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at seven", "In sieve two mesh, keep upper at eleven and lower at nine", "In sieve three mesh, keep upper at eleven, middle at ten, and lower at nine", "In winnowing mesh, keep upper at eleven and lower at ten", "Keep sand mesh at five", "Set both front and rear air handles to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at ten"]
-    }
-  },
-  castor_large: {
-    gu: {
-      name: "એરંડા (મોટા)",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>", "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>ઉપર</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>10</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા સાત રાખો", "ચારણાની જાળી માં ઉપર બાર, વચ્ચે અગિયાર અને નીચે દસ રાખો", "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું ઉપર અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ દસ રાખો"]
-    },
-    hi: {
-      name: "अरंडी (बड़ी)",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>डबल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>", "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>ऊपर</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>10</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर साढ़े सात रखें", "छलने की जाली में ऊपर बारह, बीच में ग्यारह और नीचे दस रखें", "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला ऊपर और पीछे वाला भी ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस दस रखें"]
-    },
-    en: {
-      name: "Castor (Large)",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>11</b>, Lower - <b>10</b>", "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>", "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Up</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>10</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at seven point five", "In sieve two mesh, keep upper at eleven and lower at ten", "In sieve three mesh, keep upper at twelve, middle at eleven, and lower at ten", "In winnowing mesh, keep upper at twelve and lower at eleven", "Keep sand mesh at five", "Set both front and rear air handles to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at ten"]
-    }
-  },
-  maize: {
-    gu: {
-      name: "મકાઈ",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ/સિંગલ શાફ્ટ</b>", "કટર: <b>32</b>", "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>", "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>", "રેત જાળી: <b>5</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>10/12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ અથવા સિંગલ શાફ્ટ રાખો", "કટર બત્રીસ રાખો", "ચારણાની જાળી માં ઉપર બાર, વચ્ચે અગિયાર અને નીચે દસ રાખો", "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો", "રેત જાળી પાંચ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ દસ અથવા બાર રાખો"]
-    },
-    hi: {
-      name: "मक्का",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>डबल शाफ़्ट/3</b>", "कटर: <b>32</b>", "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>", "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>", "रेत जाली: <b>5</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>10/12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट तीन रखें", "कटर बत्तीस रखें", "छलने की जाली में ऊपर बारह, बीच में ग्यारह और नीचे दस रखें", "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें", "रेत जाली पांच रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस दस या बारह रखें"]
-    },
-    en: {
-      name: "Maize",
-      settingsDisplay: ["Operating mode: <b>5/3</b>", "Cutter: <b>32</b>", "Sieve 2 Mesh: Upper - <b>11</b>, Lower - <b>10</b>", "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>", "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>", "Sand Mesh: <b>5</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>10/12</b>"],
-      settingsSpeech: ["Set the on double shaft or three", "Set the cutter at thirty two", "In sieve two mesh, keep upper at eleven and lower at ten", "In sieve three mesh, keep upper at twelve, middle at eleven, and lower at ten", "In winnowing mesh, keep upper at twelve and lower at eleven", "Keep sand mesh at five", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at ten or twelve"]
-    }
-  },
-  paddy: {
-    gu: {
-      name: "ડાંગર",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>7.5</b>", "ચારણા જાળી: ઉપર - <b>9</b>, વચ્ચે - <b>8</b>, નીચે - <b>7</b>", "સુપડી જાળી: ઉપર - <b>9</b>, નીચે - <b>8</b>", "રેત જાળી: <b>1.6</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર સાડા સાત રાખો", "ચારણાની જાળી માં ઉપર નવ, વચ્ચે આઠ અને નીચે સાત રાખો", "સુપડી જાળી માં ઉપર નવ અને નીચે આઠ રાખો", "રેત જાળી એક દશાંશ છ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "डांगर",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>डबल शाफ़्ट</b>", "कटर: <b>7.5</b>", "छलना जाली: ऊपर - <b>9</b>, बीच में - <b>8</b>, नीचे - <b>7</b>", "सुपड़ी जाલી: ઉપર - <b>9</b>, નીચે - <b>8</b>", "રેત જાળી: <b>1.6</b>", "હવા કા હેન્ડલ: આગે કા - <b>બીચ મેં</b>, પીછે કા - <b>ઉપર</b>", "ચૈમ્બર (કોઠી) કે પડદે: સાઇડ કા - <b>નીચે</b>, પીછે કા - <b>બીચ મેં</b>", "છલને કી ચાલ: <b>લંબી</b>", "ટ્રેક્ટર કા રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડપાંચ રખેં", "કટર સાઢે સાત રખેં", "છલના દો કી જાલી મેં ઉપર આઠ ઔર નીચે સાત રખેં", "છલના તીન કી જાલી મેં ઉપર નૌ, બીચ મેં આઠ ઔર નીચે સાત રખેં", "સુપડી જાલી મેં ઉપર નૌ ઔર નીચે આઠ રખેં", "રેત જાલી એક દશમલવ છ રખેં", "હવા કે હેન્ડલ મેં આગે વાલા બીચ મેં ઔર પીછે વાલા ઉપર રખેં", "ચૈમ્બર કે પર્દોં મેં સાઈડ વાલા નીચે ઔર પીછે વાલા બીચ મેં રખેં", "છલને કી ચાલ લંબી રખેં", "ટ્રેક્ટર કા રેસ બાર રખેં"]
-    },
-    en: {
-      name: "Paddy",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>7.5</b>", "Sieve 2 Mesh: Upper - <b>8</b>, Lower - <b>7</b>", "Sieve Mesh: Upper - <b>9</b>, Middle - <b>8</b>, Lower - <b>7</b>", "Winnowing Mesh: Upper - <b>9</b>, Lower - <b>8</b>", "Sand Mesh: <b>1.6</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at seven point five", "In sieve mesh, keep upper at nine, middle at eight, and lower at seven", "In winnowing mesh, keep upper at nine and lower at eight", "Keep sand mesh at one point six", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
-  },
-  groundnut: {
-    gu: {
-      name: "મગફળી",
-      settingsDisplay: ["ઓપરેટિંગ મોડ: <b>ડબલ શાફ્ટ</b>", "કટર: <b>32</b>", "ચારણા જાળી: ઉપર - <b>22</b>, નીચે - <b>18</b>", "સુપડી જાળી: ઉપર - <b>22</b>, નીચે - <b>18</b>", "રેત જાળી: <b>8</b>", "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>", "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>", "ચારણાની ચાલ: <b>લાંબી</b>", "ટ્રેક્ટરનો રેસ: <b>12</b>"],
-      settingsSpeech: ["ઓપરેટિંગ મોડ ડબલ શાફ્ટ રાખો", "કટર બત્રીસ રાખો", "ચારણાની જાળી માં ઉપર બાવીસ અને નીચે અઢાર રાખો", "સુપડી જાળી માં ઉપર બાવીસ અને નીચે અઢાર રાખો", "રેત જાળી આઠ રાખો", "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો", "ચેમ્બર ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો", "ચારણાની ચાલ લાંબી રાખો", "ટ્રેક્ટરનો રેસ બાર રાખો"]
-    },
-    hi: {
-      name: "मूंगफली",
-      settingsDisplay: ["ऑपरेटिंग मोड: <b>डबल शाफ़्ट</b>", "कटर: <b>32</b>", "छलना जाली: ऊपर - <b>22</b>, नीचे - <b>18</b>", "सुपड़ी जाली: ऊपर - <b>22</b>, नीचे - <b>18</b>", "रेत जाली: <b>8</b>", "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>", "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>", "छलने की चाल: <b>लंबी</b>", "ट्रैक्टर का रेस: <b>12</b>"],
-      settingsSpeech: ["ऑपरेटिंग मोड डबल शाफ़्ट रखें", "कटर बत्तीस रखें", "छलने की जाली में ऊपर बाईस और नीचे अठारह रखें", "सुपड़ी जाली में ऊपर बाईस और नीचे अठारह रखें", "रेत जाली आठ रखें", "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें", "चैम्बर के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें", "छलने की चाल लंबी रखें", "ट्रैक्टर का रेस बारह रखें"]
-    },
-    en: {
-      name: "Groundnut",
-      settingsDisplay: ["Operating mode: <b>Double shaft</b>", "Cutter: <b>32</b>", "Sieve Mesh: Upper - <b>22</b>, Lower - <b>18</b>", "Winnowing Mesh: Upper - <b>22</b>, Lower - <b>18</b>", "Sand Mesh: <b>8</b>", "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>", "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>", "Sieve Movement: <b>Long</b>", "Tractor Race: <b>12</b>"],
-      settingsSpeech: ["Keep the operating mode on double shaft", "Set the cutter at thirty two", "In sieve mesh, keep upper at twenty two and lower at eighteen", "In winnowing mesh, keep upper at twenty two and lower at eighteen", "Keep sand mesh at eight", "Set air handle front to middle and rear to up", "Set chamber curtains side down and rear to medium", "Keep sieve movement long", "Keep tractor RPM at twelve"]
-    }
+  en: {
+    name: "Wheat (Bhalia)",
+    modes: ["single"],
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>8</b>, Middle - <b>7</b>, Lower - <b>6</b>",
+      "Winnowing Mesh: Upper - <b>9</b>, Lower - <b>8</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Short</b>",
+      "Tractor Race: <b>14</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at nine and the lower at eight",
+      "Keep the sand mesh at three",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement short",
+      "Keep the tractor RPM at fourteen"
+    ]
   }
+},
+
+mustard: {
+  gu: {
+    name: "રાયડો",
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>4</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>4</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>13</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ચાર રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ તેર રાખો"
+    ]
+  },
+  hi: {
+    name: "रायड़ा / सरसों",
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>4</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>4</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>13</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे चार रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस तेरह रखें"
+    ]
+  },
+  en: {
+    name: "Mustard",
+    modes: ["single"],
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>4</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>4</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>13</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep both upper and lower at four",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at thirteen"
+    ]
+  }
+},
+
+sorghum_small: {
+  gu: {
+    name: "જુવાર (નાની)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>6</b>",
+      "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>",
+      "સુપડી જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પણ પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "ज्वार (छोटी)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>6</b>",
+      "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>",
+      "सुपड़ी जाली: ऊपर - <b>5.5</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर पाँच दशमलव पाँच और नीचे भी पाँच दशमलव पाँच रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Sorghum (Small)",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>6</b>",
+      "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>",
+      "Winnowing Mesh: Upper - <b>5.5</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep both upper and lower at five point five",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+sorghum_large: {
+  gu: {
+    name: "જુવાર (મોટી)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>9</b>, વચ્ચે - <b>8</b>, નીચે - <b>7</b>",
+      "સુપડી જાળી: ઉપર - <b>9</b>, નીચે - <b>8</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર નવ અને નીચે આઠ રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "ज्वार (बड़ी)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>9</b>, बीच में - <b>8</b>, नीचे - <b>7</b>",
+      "सुपड़ी जाली: ऊपर - <b>9</b>, नीचे - <b>8</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर नौ और नीचे आठ रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Sorghum (Large)",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>9</b>, Middle - <b>8</b>, Lower - <b>7</b>",
+      "Winnowing Mesh: Upper - <b>9</b>, Lower - <b>8</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at nine and the lower at eight",
+      "Keep the sand mesh at three",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+guar: {
+  gu: {
+    name: "ગુવાર",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>",
+      "સુપડી જાળી: ઉપર - <b>5.5</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>ઉપર</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>13</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર પાંચ દશાંશ પાંચ અને નીચે પણ પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું ઉપર અને પાછળનું પણ ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ તેર રાખો"
+    ]
+  },
+  hi: {
+    name: "ग्वार",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>",
+      "सुपड़ी जाली: ऊपर - <b>5.5</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>ऊपर</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>13</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर पाँच दशमलव पाँच और नीचे भी पाँच दशमलव पाँच रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला ऊपर और पीछे वाला भी ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस तेरह रखें"
+    ]
+  },
+  en: {
+    name: "Guar",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>",
+      "Winnowing Mesh: Upper - <b>5.5</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Up</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>13</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep both upper and lower at five point five",
+      "Keep the sand mesh at three",
+      "Set the air handle with both front and rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at thirteen"
+    ]
+  }
+},
+
+cumin: {
+  gu: {
+    name: "જીરું",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>",
+      "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "जीरा",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>",
+      "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Cumin",
+    modes: ["single"],
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>",
+      "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at six and the lower at five point five",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+fennel: {
+  gu: {
+    name: "વરિયાળી",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>",
+      "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "सौंफ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>",
+      "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Fennel",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>",
+      "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eight and the lower at seven",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+psyllium: {
+  gu: {
+    name: "ઇસબગુલ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>6</b>",
+      "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3 / 2.5</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ અથવા બે દશાંશ પાંચ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "इसबगोल",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>6</b>",
+      "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3 / 2.5</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन या दो दशमलव पाँच रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Psyllium",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>6</b>",
+      "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3 / 2.5</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three or two point five",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+amaranth: {
+  gu: {
+    name: "રાજગરો",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>4</b>, વચ્ચે - <b>3</b>, નીચે - <b>1.6</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
+      "રેત જાળી: <b>પતરું</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
+      "રેત જાળી માં પતરું રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "राजगिरा",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>4</b>, बीच में - <b>3</b>, नीचे - <b>1.6</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
+      "रेत जाली: <b>चद्दर</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
+      "रेत जाली की जगह चद्दर का उपयोग करें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Amaranth",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>4</b>, Middle - <b>3</b>, Lower - <b>1.6</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
+      "Sand Mesh: <b>Sheet</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three",
+      "Use a sheet for the sand mesh",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+ajwain: {
+  gu: {
+    name: "અજમો",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>5</b>, વચ્ચે - <b>4.5</b>, નીચે - <b>4</b>",
+      "સુપડી જાળી: ઉપર - <b>5</b>, નીચે - <b>4.5</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર પાંચ અને નીચે ચાર દશાંશ પાંચ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "अजवायन",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>5</b>, बीच में - <b>4.5</b>, नीचे - <b>4</b>",
+      "सुपड़ी जाली: ऊपर - <b>5</b>, नीचे - <b>4.5</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर पाँच और नीचे चार दशमलव पाँच रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Ajwain",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>5</b>, Middle - <b>4.5</b>, Lower - <b>4</b>",
+      "Winnowing Mesh: Upper - <b>5</b>, Lower - <b>4.5</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at five and the lower at four point five",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+dill: {
+  gu: {
+    name: "સુવા",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>",
+      "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "सुवा",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>",
+      "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Dill",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>",
+      "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at six and the lower at five point five",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+fenugreek: {
+  gu: {
+    name: "મેથી",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>6</b>, વચ્ચે - <b>5.5</b>, નીચે - <b>5</b>",
+      "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "मेथी",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>6</b>, बीच में - <b>5.5</b>, नीचे - <b>5</b>",
+      "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Fenugreek",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>6</b>, Middle - <b>5.5</b>, Lower - <b>5</b>",
+      "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at six and the lower at five point five",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+radish_seed: {
+  gu: {
+    name: "રજકો",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "रजका",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Radish Seed",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+chicory: {
+  gu: {
+    name: "ચીકોરી",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "चिकोरी",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Chicory",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+onion_seed: {
+  gu: {
+    name: "ડુંગળી નું બી",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "प्याज का बीज",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Onion Seed",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+taramira: {
+  gu: {
+    name: "તારામેરા",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "तारामीरा",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Taramira",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+linseed: {
+  gu: {
+    name: "અસારીયો",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "असारिया",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Linseed",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+barley: {
+  gu: {
+    name: "જવ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>8</b>, વચ્ચે - <b>7</b>, નીચે - <b>6</b>",
+      "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "जव",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>8</b>, बीच में - <b>7</b>, नीचे - <b>6</b>",
+      "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Barley",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>8</b>, Middle - <b>7</b>, Lower - <b>6</b>",
+      "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eight and the lower at seven",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+sesame: {
+  gu: {
+    name: "તલ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>4.5</b>, વચ્ચે - <b>4</b>, નીચે - <b>3</b>",
+      "સુપડી જાળી: ઉપર - <b>4</b>, નીચે - <b>3</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર ચાર અને નીચે ત્રણ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "तिल",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>4.5</b>, बीच में - <b>4</b>, नीचे - <b>3</b>",
+      "सुपड़ी जाली: ऊपर - <b>4</b>, नीचे - <b>3</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर चार और नीचे तीन रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Sesame",
+    modes: ["single"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>4.5</b>, Middle - <b>4</b>, Lower - <b>3</b>",
+      "Winnowing Mesh: Upper - <b>4</b>, Lower - <b>3</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at four and the lower at three",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+green_gram: {
+  gu: {
+    name: "મગ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>",
+      "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "मूंग",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>",
+      "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Green Gram",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>",
+      "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at six and the lower at five point five",
+      "Keep the sand mesh at three",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+moth_bean: {
+  gu: {
+    name: "મઠ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>",
+      "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "मोठ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>",
+      "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Moth Bean",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>",
+      "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at six and the lower at five point five",
+      "Keep the sand mesh at three",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+black_gram: {
+  gu: {
+    name: "અડદ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>7</b>, વચ્ચે - <b>6</b>, નીચે - <b>5.5</b>",
+      "સુપડી જાળી: ઉપર - <b>6</b>, નીચે - <b>5.5</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર છ અને નીચે પાંચ દશાંશ પાંચ રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "उड़द",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>7</b>, बीच में - <b>6</b>, नीचे - <b>5.5</b>",
+      "सुपड़ी जाली: ऊपर - <b>6</b>, नीचे - <b>5.5</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर छह और नीचे पाँच दशमलव पाँच रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Black Gram",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>7</b>, Middle - <b>6</b>, Lower - <b>5.5</b>",
+      "Winnowing Mesh: Upper - <b>6</b>, Lower - <b>5.5</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at six and the lower at five point five",
+      "Keep the sand mesh at three",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+cowpea: {
+  gu: {
+    name: "ચોળી",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>8</b>, વચ્ચે - <b>7</b>, નીચે - <b>6</b>",
+      "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "चोली",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>8</b>, बीच में - <b>7</b>, नीचे - <b>6</b>",
+      "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Cowpea",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>8</b>, Middle - <b>7</b>, Lower - <b>6</b>",
+      "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eight and the lower at seven",
+      "Keep the sand mesh at three",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+pigeon_pea: {
+  gu: {
+    name: "તુવેર",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>",
+      "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "तुअर",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>",
+      "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Pigeon Pea",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>",
+      "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eleven and the lower at ten",
+      "Keep the sand mesh at five",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+chickpea_desi: {
+  gu: {
+    name: "ચણા (દેશી)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>",
+      "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "चना (देशी)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>",
+      "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Chickpea (Desi)",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>",
+      "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eleven and the lower at ten",
+      "Keep the sand mesh at five",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+lentil: {
+  gu: {
+    name: "ચણા (કાબુલી)",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "કટર: <b>9.5</b>",
+      "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>",
+      "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "चना (काबुली)",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "कटर: <b>9.5</b>",
+      "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>",
+      "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Chickpea (Kabuli)",
+    modes: ["double"],
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "Cutter: <b>9.5</b>",
+      "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>",
+      "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at twelve and the lower at eleven",
+      "Keep the sand mesh at five",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+soyabean: {
+  gu: {
+    name: "સોયાબીન",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>",
+      "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "सोयाबीन",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>",
+      "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Soyabean",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>",
+      "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eleven and the lower at ten",
+      "Keep the sand mesh at five",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+vaal: {
+  gu: {
+    name: "વાલ",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "કટર: <b>9.5</b>",
+      "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>",
+      "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "वाल",
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "कटर: <b>9.5</b>",
+      "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>",
+      "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Hyacinth Bean",
+    modes: ["double"],
+    sievePair: "upper_middle",
+    settingsDisplay: [
+      "Cutter: <b>9.5</b>",
+      "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>",
+      "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at twelve and the lower at eleven",
+      "Keep the sand mesh at five",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+coriander: {
+  gu: {
+    name: "ધાણા",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>8.5</b>",
+      "ચારણા જાળી: ઉપર - <b>9</b>, વચ્ચે - <b>8</b>, નીચે - <b>7</b>",
+      "સુપડી જાળી: ઉપર - <b>8</b>, નીચે - <b>7</b>",
+      "રેત જાળી: <b>3</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર આઠ અને નીચે સાત રાખો",
+      "રેત જાળી ત્રણ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ દસ રાખો"
+    ]
+  },
+  hi: {
+    name: "धनिया",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>8.5</b>",
+      "छलना जाली: ऊपर - <b>9</b>, बीच में - <b>8</b>, नीचे - <b>7</b>",
+      "सुपड़ी जाली: ऊपर - <b>8</b>, नीचे - <b>7</b>",
+      "रेत जाली: <b>3</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर आठ और नीचे सात रखें",
+      "रेत जाली तीन रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस दस रखें"
+    ]
+  },
+  en: {
+    name: "Coriander",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>8.5</b>",
+      "Sieve Mesh: Upper - <b>9</b>, Middle - <b>8</b>, Lower - <b>7</b>",
+      "Winnowing Mesh: Upper - <b>8</b>, Lower - <b>7</b>",
+      "Sand Mesh: <b>3</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eight and the lower at seven",
+      "Keep the sand mesh at three",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at ten"
+    ]
+  }
+},
+
+castor_small: {
+  gu: {
+    name: "એરંડા (નાના)",
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "કટર: <b>7</b>",
+      "ચારણા જાળી: ઉપર - <b>11</b>, વચ્ચે - <b>10</b>, નીચે - <b>9</b>",
+      "સુપડી જાળી: ઉપર - <b>11</b>, નીચે - <b>10</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>ઉપર</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર અગિયાર અને નીચે દસ રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું ઉપર અને પાછળનું પણ ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ દસ રાખો"
+    ]
+  },
+  hi: {
+    name: "अरंडी (छोटी)",
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "कटर: <b>7</b>",
+      "छलना जाली: ऊपर - <b>11</b>, बीच में - <b>10</b>, नीचे - <b>9</b>",
+      "सुपड़ी जाली: ऊपर - <b>11</b>, नीचे - <b>10</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>ऊपर</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर ग्यारह और नीचे दस रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला ऊपर और पीछे वाला भी ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस दस रखें"
+    ]
+  },
+  en: {
+    name: "Castor (Small)",
+    modes: ["double"],
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "Cutter: <b>7</b>",
+      "Sieve Mesh: Upper - <b>11</b>, Middle - <b>10</b>, Lower - <b>9</b>",
+      "Winnowing Mesh: Upper - <b>11</b>, Lower - <b>10</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Up</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at eleven and the lower at ten",
+      "Keep the sand mesh at five",
+      "Set both the front and rear air handles to up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at ten"
+    ]
+  }
+},
+
+castor_large: {
+  gu: {
+    name: "એરંડા (મોટા)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>",
+      "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>ઉપર</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું ઉપર અને પાછળનું પણ ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ દસ રાખો"
+    ]
+  },
+  hi: {
+    name: "अरंडी (बड़ी)",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>",
+      "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>ऊपर</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला ऊपर और पीछे वाला भी ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस दस रखें"
+    ]
+  },
+  en: {
+    name: "Castor (Large)",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>",
+      "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Up</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>10</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at twelve and the lower at eleven",
+      "Keep the sand mesh at five",
+      "Set both the front and rear air handles to up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at ten"
+    ]
+  }
+},
+
+maize: {
+  gu: {
+    name: "મકાઈ",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>32</b>",
+      "ચારણા જાળી: ઉપર - <b>12</b>, વચ્ચે - <b>11</b>, નીચે - <b>10</b>",
+      "સુપડી જાળી: ઉપર - <b>12</b>, નીચે - <b>11</b>",
+      "રેત જાળી: <b>5</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>10/12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર બાર અને નીચે અગિયાર રાખો",
+      "રેત જાળી પાંચ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ દસ અથવા બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "मक्का",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>32</b>",
+      "छलना जाली: ऊपर - <b>12</b>, बीच में - <b>11</b>, नीचे - <b>10</b>",
+      "सुपड़ी जाली: ऊपर - <b>12</b>, नीचे - <b>11</b>",
+      "रेत जाली: <b>5</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>10/12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर बारह और नीचे ग्यारह रखें",
+      "रेत जाली पांच रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस दस या बारह रखें"
+    ]
+  },
+  en: {
+    name: "Maize",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>32</b>",
+      "Sieve Mesh: Upper - <b>12</b>, Middle - <b>11</b>, Lower - <b>10</b>",
+      "Winnowing Mesh: Upper - <b>12</b>, Lower - <b>11</b>",
+      "Sand Mesh: <b>5</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>10/12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at twelve and the lower at eleven",
+      "Keep the sand mesh at five",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at ten or twelve"
+    ]
+  }
+},
+
+paddy: {
+  gu: {
+    name: "ડાંગર",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "કટર: <b>7.5</b>",
+      "ચારણા જાળી: ઉપર - <b>9</b>, વચ્ચે - <b>8</b>, નીચે - <b>7</b>",
+      "સુપડી જાળી: ઉપર - <b>9</b>, નીચે - <b>8</b>",
+      "રેત જાળી: <b>1.6</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર નવ અને નીચે આઠ રાખો",
+      "રેત જાળી એક દશાંશ છ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "डांगर",
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "कटर: <b>7.5</b>",
+      "छलना जाली: ऊपर - <b>9</b>, बीच में - <b>8</b>, नीचे - <b>7</b>",
+      "सुपड़ी जाली: ऊपर - <b>9</b>, नीचे - <b>8</b>",
+      "रेत जाली: <b>1.6</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर नौ और नीचे आठ रखें",
+      "रेत जाली एक दशमलव छह रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Paddy",
+    modes: ["double"],
+    sievePair: "middle_lower",
+    settingsDisplay: [
+      "Cutter: <b>7.5</b>",
+      "Sieve Mesh: Upper - <b>9</b>, Middle - <b>8</b>, Lower - <b>7</b>",
+      "Winnowing Mesh: Upper - <b>9</b>, Lower - <b>8</b>",
+      "Sand Mesh: <b>1.6</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at nine and the lower at eight",
+      "Keep the sand mesh at one point six",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+},
+
+groundnut: {
+  gu: {
+    name: "મગફળી",
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "કટર: <b>32</b>",
+      "ચારણા જાળી: ઉપર - <b>22</b>, નીચે - <b>18</b>",
+      "સુપડી જાળી: ઉપર - <b>22</b>, નીચે - <b>18</b>",
+      "રેત જાળી: <b>8</b>",
+      "હવાનું હૅન્ડલ: આગળનું - <b>વચ્ચે</b>, પાછળનું - <b>ઉપર</b>",
+      "ચેમ્બર (કોઠી) પડદા: સાઇડના - <b>નીચા</b>, પાછળનો - <b>મધ્યમ</b>",
+      "ચારણાની ચાલ: <b>લાંબી</b>",
+      "ટ્રેક્ટરનો રેસ: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "સુપડી જાળી માં ઉપર બાવીસ અને નીચે અઢાર રાખો",
+      "રેત જાળી આઠ રાખો",
+      "હવાનું હેન્ડલ માં આગળનું વચ્ચે અને પાછળનું ઉપર રાખો",
+      "ચેમ્બર એટલે કોઠી ના પડદા માં સાઈડના નીચા અને પાછળનો મધ્યમ રાખો",
+      "ચારણાની ચાલ લાંબી રાખો",
+      "ટ્રેક્ટરનો રેસ બાર રાખો"
+    ]
+  },
+  hi: {
+    name: "मूंगफली",
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "कटर: <b>32</b>",
+      "छलना जाली: ऊपर - <b>22</b>, नीचे - <b>18</b>",
+      "सुपड़ी जाली: ऊपर - <b>22</b>, नीचे - <b>18</b>",
+      "रेत जाली: <b>8</b>",
+      "हवा का हैंडल: आगे का - <b>बीच में</b>, पीछे का - <b>ऊपर</b>",
+      "चैम्बर (कोठी) के पड़दे: साइड का - <b>नीचे</b>, पीछे का - <b>बीच में</b>",
+      "छलने की चाल: <b>लंबी</b>",
+      "ट्रैक्टर का रेस: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "सुपड़ी जाली में ऊपर बाईस और नीचे अठारह रखें",
+      "रेत जाली आठ रखें",
+      "हवा के हैंडल में आगे वाला बीच में और पीछे वाला ऊपर रखें",
+      "चैम्बर यानी कोठी के पर्दों में साइड वाला नीचे और पीछे वाला बीच में रखें",
+      "छलने की चाल लंबी रखें",
+      "ट्रैक्टर का रेस बारह रखें"
+    ]
+  },
+  en: {
+    name: "Groundnut",
+    modes: ["double"],
+    sievePair: "upper_lower",
+    settingsDisplay: [
+      "Cutter: <b>32</b>",
+      "Sieve Mesh: Upper - <b>22</b>, Lower - <b>18</b>",
+      "Winnowing Mesh: Upper - <b>22</b>, Lower - <b>18</b>",
+      "Sand Mesh: <b>8</b>",
+      "Air Handle: Front - <b>Middle</b>, Rear - <b>Up</b>",
+      "Chamber Curtain: Side - <b>Down</b>, Rear - <b>Medium</b>",
+      "Sieve Movement: <b>Long</b>",
+      "Tractor Race: <b>12</b>"
+    ],
+    settingsSpeech: [
+      "In the winnowing mesh, keep the upper at twenty two and the lower at eighteen",
+      "Keep the sand mesh at eight",
+      "Set the air handle with the front at middle and the rear at up",
+      "Set the chamber curtain with the side down and the rear at medium",
+      "Keep the sieve movement long",
+      "Keep the tractor RPM at twelve"
+    ]
+  }
+}
 
 };
+const problems = {gu: [{title: "દાણા તૂટવા",solutionDisplay: ["ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.","સૂપડા માં ઓરવાનું પ્રમાણ વધારે/ઓછું હોય તો એકસરખા પ્રમાણમાં ઓરવું.","કટર (કોનકેવ) ઊંચી હોય તો થોડી નીચે ઉતારી ગેજ પ્રમાણે ગોઠવવી.","ચેમ્બર નીચે અનાજ કે ભૂસું ભરાઈ ગયું હોય તો ગીસી પડદો ઊંચો કરવો."],solutionSpeech: ["ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.", "સૂપડા માં ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "કટર ઊંચી હોય તો ગેજ પ્રમાણે થોડી નીચે ઉતારવી.", "ચેમ્બર નીચે કચરો હોય તો ગીસી પડદો ઊંચો કરવો."]},{title: "ભૂસા સાથે દાણા જવા",solutionDisplay: ["થ્રેસરની સ્પીડ વધારે હોય તો ટ્રેક્ટરની ગતિ ઓછી કરવી.","પંખા ની સ્પીડ વધારે હોય તો પંખાની સ્પીડ ઓછી કરવી.","ચારણો ધીમે ચાલતો હોય તો ચારણા ની સ્પીડ વધારવી.","ચારણો વધારે ઊંચો હોય તો ચારણો પ્રમાણસર નીચે ઉતારવો.","ચારણો નો ઢાળ ઉલટો હોય તો ચારણો દાણા નીકળવાની બાજુએ નીચે કરવો.","થ્રેસરના ચેમ્બર નીચેના સાઈડના પડદા વધારે પડતા નીચે રાખેલા હોય તો પડદા પ્રમાણસર ઉંચા કરી સેટ કરવા.","થ્રેસરમાં ચેમ્બરની અંદરનો ગીસી પડદો નીચે હોય તો ગીસી વાળો પડદો પ્રમાણસર ઉંચે ઉઠાવી લેવો."],solutionSpeech: ["ટ્રેક્ટર અને પંખાની સ્પીડ ઓછી કરવી.", "જો ચારણો ધીમે હોય તો સ્પીડ વધારવી.", "ચારણો પ્રમાણસર નીચે ઉતારવો અને ઢાળ સીધો કરવો.", "સાઈડના અને ગીસી પડદા પ્રમાણસર ઉંચા કરવા."]},{title: "અનાજ સાફ ન નીકળતું હોય",solutionDisplay: ["રોટરની સ્પીડ ઓછી હોય તો રોટરની સ્પીડ વધારવી.","પંખાની સ્પીડ ઓછી હોય તો પંખાની સ્પીડ વધારવી.","ચારણો વધારે પડતો નીચે લીધેલો હોય તો ચારણો ઊંચો કરવો.","થ્રેસરમાં ચેમ્બરની અંદરનો ગીસી પડદો ઉંચો લીધેલો હોય તો ગીસી પડદો નીચે લેવો.","થ્રેસરના ચેમ્બર નીચેના સાઈડના પડદા ઉંચા લીધેલા હોય તો પડદા પ્રમાણસર નીચે રાખવા.","સૂપડીમાં જાળી નીચે ખસતું પતરું અંદરની બાજુ ખેંચેલું હોય તો પતરું બહારની બાજુ ખેંચી લેવું.","ચારણાનો ઢાળ પાછળ વધારે હોય તો ચારણો પાછળથી ઉંચો લેવો.","ચારણાની સ્પીડ ઓછી કે વધારે હોય તો ચારણાની સ્પીડ મધ્યમ કરવી.","સૂપડામાં ઓછું કે વધારે ઓરવામાં આવતું હોય તો એક સરખા પ્રમાણમાં ઓરવું.","થ્રેસર હુક આગળથી નીચું હોય તો થ્રેસર હુક આગળથી ઉંચું કરવું.","સૂપડીમાં હવા ઓછી કરેલ હોય તો સૂપડીમાં હવા વધારી દેવી.","હવાના નાના ભૂંગળામાં ખિસકોલી એ માળો કરેલો હોય તો માળો કાઢી નાખવો."],solutionSpeech: ["રોટર અને પંખાની સ્પીડ વધારવી.", "ચારણો ઊંચો કરવો અને પડદા નીચે લેવા.", "સૂપડીનું પતરું બહાર ખેંચવું અને ચારણાનો ઢાળ સેટ કરવો.", "ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "થ્રેસર હુક ઊંચો કરવો, હવા વધારવી અને હવાના ભૂંગળા સાફ કરવા."]},{title: "ચારણાથી બરાબર ચળાતું ન હોય",solutionDisplay: ["ચારણાની જાળીઓ ભરાઈ ગઈ હોય તો પાવડી (તાવેથા)નો ઉપયોગ કરી જાળીઓ સાફ કરી દેવી.","ચારણો પાછળ નમેલો હોય તો ચારણો સમતોલ કરવો.","ચારણાની સ્પીડ વધારે હોય તો ચારણાની સ્પીડ ઓછી કરવી.","ચારણામાં જાળીઓ ઉંધી લગાવેલી હોય તો જાળીઓ સીધી લગાવી દેવી."],solutionSpeech: ["પાવડીથી જાળીઓ સાફ કરવી.", "ચારણો સમતોલ કરવો અને સ્પીડ ઓછી કરવી.", "જાળીઓ સીધી લગાવવી."]},{title: "થ્રેસીંગ ડ્રમ ભરાઇ જવું",solutionDisplay: ["એકી સાથે વધારે પડતું ઓરવાતું હોય તો ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.","મેઇન રોટરની સ્પીડ ઓછી હોય તો મેઇન રોટરની સ્પીડ વધારવી.","ભેજવાળું કે લીલું ઓરવામાં આવતું હોય તો સૂકાયેલું ઓરવું.","થ્રેસીંગ ચેમ્બરની અંદરનો ગીસી પડદો નીચે ઉતરી ગયો હોય તો ગીસી પડદો યોગ્ય પ્રમાણમાં ઉંચો લેવો.","થ્રેસીંગ ચેમ્બરની કટર વધારે પડતી નીચી રાખેલી હોય તો કટર સાધારણ ઉંચી કરવી."],solutionSpeech: ["ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.", "મેઇન રોટરની સ્પીડ વધારવી.", "સૂકો પાક ઓરવો અને પડદો તેમજ કટર ઊંચા કરવા."]},{title: "થ્રેસર નું ધ્રુજવું",solutionDisplay: ["રોટરની શાફ્ટ આઉટ હોય તો રોટરની શાફ્ટ થ્રુ(બેલેન્સ) કરાવવી.","થ્રેસરના ટાયરનો સપોર્ટ ઢીલો પડી ગયો હોય તો પથ્થર કે લાકડાનો ટુકડો મૂકી ટાયરને સપોર્ટ આપવો.","ટાયરમાં હવાનું પ્રમાણ ઘટી ગયું હોય તો ટાયરોમાં પ્રમાણસર હવા ભરાવી લેવી.","મેઇન રોટરનું યોગ્ય રીતે બેલેન્સ કરેલું ન હોય તો મેઇન રોટરને બેલેન્સ કરાવી લેવું.","બેરીંગો તૂટી ગઈ હોય તો નવી બેરીંગો નખાવવી.","થ્રેસર કે ટ્રેક્ટર સાઈડ જોઈન્ટ આઉટ થઈ ગયો હોય તો જોઈન્ટ વ્યવસ્થિત લેથ ઉપર ચઢાવી રીપેરીંગ કરી દેવો.","થ્રેસરમાં રોટરના પાટા ખોટી રીતે લગાવેલા હોય તો પાટા ખોલીને લાઈન મુજબ લગાવી દેવા.","થ્રેસરનું ફ્લાયવ્હીલ આઉટ હોય તો ફ્લાયવ્હીલ બદલીને નવું લગાવી દેવું.","વી-બેલ્ટ (પટ્ટા) ઢીલા પડી ગયા હોય તો સપોર્ટપુલીથી પટ્ટા ટાઈટ કરવા."],solutionSpeech: ["રોટર શાફ્ટ અને બેલેન્સિંગ ચેક કરાવવું.", "ટાયર સપોર્ટ અને હવા ચેક કરવી.", "બેરીંગો અને જોઈન્ટ રીપેર કરાવવા.", "રોટરના પાટા લાઈનમાં લગાવવા અને વી-બેલ્ટ ટાઈટ કરવા."]}],hi: [{title: "दाने टूटना",solutionDisplay: ["ट्रैक्टर की गति अधिक हो तो गति कम करे।","सूपड़े में फसल डालने की मात्रा ज़्यादा/कम हो तो एकसमान डाले।","कटर (कॉनकेव) ऊँचा हो तो गेज के अनुसार थोड़ा नीचे करे।","चैंबर(कटर) के नीचे फसल या भूसा भर गया हो तो गीसी पड़दे ऊँचा करे।"],solutionSpeech: ["ट्रैक्टर की गति कम करे।", "फसल एकसमान मात्रा में डाले।", "कटर को थोड़ा नीचे करे और गीसी पड़दे ऊँचा करे।"]},{title: "भूसे के साथ दाने जाना",solutionDisplay: ["थ्रेशर की गति अधिक हो तो ट्रैक्टर की गति कम करे।","पंखे की गति अधिक हो तो पंखे की गति कम करे।","छलना धीमा चलता हो तो छलने की गति बढ़ाए।","छलना ज़्यादा ऊँचा हो तो छलने को सही मात्रा में नीचे उतारे।","छलने का ढलाव उल्टा हो तो छलने को दाने निकलने की ओर नीचे करे।","थ्रेशर में चैंबर के नीचे की साइड के पड़दे ज़्यादा नीचे रखे हों तो पड़दे को सही मात्रा में ऊँचा करके सेट करे।","थ्रेशर में चैंबर के अंदर का गीसी पड़दा नीचे हो तो सही मात्रा में ऊँचा उठाले।"],solutionSpeech: ["ट्रैक्टर और पंखे की गति कम करे।", "छलने की गति बढ़ाएं और ढलाव सही करे।", "साइड के और गीसी पड़दे ऊँचा करे।"]},{title: "फसल साफ न निकलना",solutionDisplay: ["रोटर की गति कम हो तो रोटर की गति बढ़ाए।","पंखे की गति कम हो तो पंखे की गति बढ़ाए।","छलना ज़्यादा नीचे लिया गया हो तो छलने को ऊँचा करे।","थ्रेशर में चैंबर के अंदर का गीसी पड़दा ऊँचा लिया गया हो तो नीचे करे।","थ्रेशर के चैंबर के नीचे की साइड के पड़दे ऊँचे लिए गए हों तो पर्दों को सही मात्रा में नीचे रखे।","सूपड़ी में जाली के नीचे खिसकने वाला पतरा अंदर की ओर खींचा गया हो तो पतरे को बाहर की ओर खींच ले।","छलने का ढलाव पीछे अधिक हो तो छलने को पीछे से ऊँचा करे।","छलने की गति ज़्यादा/कम हो तो मध्यम करे।","सूपड़े में फसल एकसमान मात्रा में डाले।","थ्रेशर हुक आगे से नीचा हो तो उसे ऊँचा करे।","सूपडी में हवा कम की गई हो तो उसे बढ़ा दे।","हवा के छोटे भूंगले में गिलहरी ने घोंसला बनाया हो तो घोंसला हटा दे।"],solutionSpeech: ["रोटर और पंखे की गति बढ़ाएं।", "छलने और पड़दे की सेटिंग सही करे।", "सूपड़ी का पतरा बाहर खींचे और ढलाव सही करे।", "हुक ऊँचा करे और हवा के पाइप साफ़ करे।"]},{title: "छलना से ठीक न छलना",solutionDisplay: ["छलने की नीचे की जालियां भर जाए तो पावड़ी का उपयोग कर छलने की जालियां साफ़ करे।","छलना पीछे झुका हो तो छलने को समतल करे।","छलने की गति अधिक हो तो उसे कम करे।","छलने में जालियाँ उलटी लगी हों तो उन्हें सीधा लगाए।"],solutionSpeech: ["जालियों को साफ़ करे और छलने को समतल रखे।", "गति कम करे और जालियां सीधी लगाए।"]},{title: "थ्रेसिंग ड्रम(कोठी) भर जाना",solutionDisplay: ["एक साथ बहुत अधिक फसल न डालें, कोठी खाली करके उसे सही मात्रामें डाले।","मुख्य रोटर की गति कम हो तो उसे सही तरह से बढ़ाए।","गीली या हरी फसल डाली जा रही हो तो सुखी ही डाले।","थ्रेसिंग चैम्बर के अंदर का गीसी पड़दा नीचे उतर गया हो तो सही मात्रा में ऊपर करे।","थ्रेसिंग चैंबर का कटर बहुत नीचा रखा गया हो तो कटर को सही मात्रा में ऊँचा करे।"],solutionSpeech: ["कोठी खाली करे और फसल एकसमान डाले।", "रोटर की गति बढ़ाएं और सूखी फसल का उपयोग करे।"]},{title: "थ्रेशर का कंपन",solutionDisplay: ["रोटर का शाफ़्ट थ्रु(बैलेन्स) करवाए।","टायर को पत्थर या लकड़ी का टुकड़ा लगाकर सपोर्ट दे।","टायर में हवा का दबाव सही रखें।","मेन रोटर का बैलेंसिंग सही करवाएं।","बेअरिंग तूट गई हो तो नई डलवाए।","थ्रेशर या ट्रेक्टर साईड जॉइंट आउट हो तो लेथ पर रिपेर करवाए।","रोटर के पाटे सही लाइन में लगाए।","लोडव्हील आउट हो तो नया डलवाए।","ऑपरेटिंग मोड: ढीले पड़े हो तो सपोर्ट पुली से टाइट करे।"],solutionSpeech: ["शाफ़्ट और बैलेंसिंग चेक करवाए।", "टायर और बेअरिंग की जांच करे।", "जॉइंट और पाटे सही करे और बेल्ट टाइट करे।"]}],en: [{title: "Grain Breakage",solutionDisplay: ["If the tractor's speed is too high, reduce the speed.","If the amount fed into the feeder is incorrect, maintain uniform feeding.","If the cutter (concave) is too high, adjust it slightly lower as per the gauge.","If grain or chaff is clogged under the chamber, raise the sieve curtain."],solutionSpeech: ["Reduce tractor speed and ensure uniform feeding.", "Adjust the cutter lower and raise the sieve curtain if needed."]},{title: "Grains Going with Chaff",solutionDisplay: ["If the thresher's speed is too high, reduce the tractor's speed.","If the fan's speed is too high, lower the fan's speed.","If the sieve feeder runs slowly, increase the sieve feeder's speed.","If the sieve feeder is too high, lower it proportionately.","If the sieve feeder's slope is reversed, lower it toward the grain outlet side.","If the chamber's side curtains are too low, raise them proportionately.","If the sieve curtain inside the chamber is too low, raise it proportionately."],solutionSpeech: ["Reduce speed and adjust the sieve feeder's height and slope.", "Raise the side and internal sieve curtains."]},{title: "Grain Not Coming Out Clean",solutionDisplay: ["If the rotor's speed is low, increase the rotor's speed.","If the fan's speed is low, increase the fan's speed.","If the sieve feeder is set too low, raise it.","If the sieve curtain inside the chamber is set too high, lower it.","If the chamber's side curtains are set too high, lower them proportionately.","If the movable sheet under the feeder mesh is pulled inward, pull it outward.","If the sieve feeder's rear slope is too high, raise the rear end.","If the sieve feeder's speed is incorrect, set it to medium speed.","Feed crops uniformly into the feeder.","If the thresher hook is low, raise the front of the hook.","If air flow in the feeder is low, increase it.","If squirrels have nested in air ducts, remove the nest."],solutionSpeech: ["Increase rotor and fan speed.", "Adjust sieve and curtain heights.", "Check the feeder sheet, hook height, and clear any nests in air ducts."]},{title: "Sieve Feeder Not Working Properly",solutionDisplay: ["If meshes are clogged, clean them using a trowel.","If the sieve feeder is tilted backward, level it.","If the speed is too high, reduce it.","If meshes are installed upside down, install them correctly."],solutionSpeech: ["Clean meshes, level the feeder, and check the speed and mesh orientation."]},{title: "Threshing Drum Jamming",solutionDisplay: ["Avoid overfeeding; empty the drum and feed proportionately.","If main rotor speed is low, increase it appropriately.","If crops are wet, feed dried crops.","If the internal sieve curtain is low, raise it.","If the cutter is too low, raise it slightly."],solutionSpeech: ["Ensure uniform feeding and increase rotor speed.", "Use dry crops and adjust the curtain and cutter height."]},{title: "Thresher Vibrating",solutionDisplay: ["Balance the rotor shaft.","Support the tires with stones or wood if loose.","Maintain correct tire pressure.","Ensure the main rotor is properly balanced.","Replace broken bearings.","Repair misaligned joints on a lathe.","Align rotor blades correctly in a line.","Replace the flywheel if it is out.","Tighten loose Operating modes using the pulley."],solutionSpeech: ["Balance the shaft and rotor.", "Check tires and bearings.", "Repair joints and align blades and belts."]}]};
 
-const models = {
-  shahenshah: {
-    type: "noVBelt",
-    crops: ["cumin","wheat","pearl_millet_g","pearl_millet_r"]
-  },
-  smart_single: {
-    type: "noVBelt",
-    crops: ["cumin","wheat"]
-  },
-  jageerdar_single: {
-    type: "noVBelt",
-    crops: ["cumin","wheat"]
-  },
-  smart_double: {
-    type: "doubleShaft",
-    crops: ["cumin","wheat","pearl_millet_g"]
-  },
-  jageerdar_double: {
-    type: "doubleShaft",
-    crops: ["cumin","wheat","pearl_millet_g"]
-  },
-  maharaja: {
-    type: "maharaja",
-    crops: Object.keys(crops)
-  }
-};
-
-const problems = {
-  gu: [
-    {
-      title: "દાણા તૂટવા",
-      solutionDisplay: [
-        "ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.",
-        "સૂપડા માં ઓરવાનું પ્રમાણ વધારે/ઓછું હોય તો એકસરખા પ્રમાણમાં ઓરવું.",
-        "કટર (કોનકેવ) ઊંચી હોય તો થોડી નીચે ઉતારી ગેજ પ્રમાણે ગોઠવવી.",
-        "ચેમ્બર નીચે અનાજ કે ભૂસું ભરાઈ ગયું હોય તો ગીસી પડદો ઊંચો કરવો."
-      ],
-      solutionSpeech: ["ટ્રેક્ટર ની સ્પીડ વધારે હોય તો સ્પીડ ઓછી કરવી.", "સૂપડા માં ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "કટર ઊંચી હોય તો ગેજ પ્રમાણે થોડી નીચે ઉતારવી.", "ચેમ્બર નીચે કચરો હોય તો ગીસી પડદો ઊંચો કરવો."]
-    },
-    {
-      title: "ભૂસા સાથે દાણા જવા",
-      solutionDisplay: [
-        "થ્રેસરની સ્પીડ વધારે હોય તો ટ્રેક્ટરની ગતિ ઓછી કરવી.",
-        "પંખા ની સ્પીડ વધારે હોય તો પંખાની સ્પીડ ઓછી કરવી.",
-        "ચારણો ધીમે ચાલતો હોય તો ચારણા ની સ્પીડ વધારવી.",
-        "ચારણો વધારે ઊંચો હોય તો ચારણો પ્રમાણસર નીચે ઉતારવો.",
-        "ચારણો નો ઢાળ ઉલટો હોય તો ચારણો દાણા નીકળવાની બાજુએ નીચે કરવો.",
-        "થ્રેસરના ચેમ્બર નીચેના સાઈડના પડદા વધારે પડતા નીચે રાખેલા હોય તો પડદા પ્રમાણસર ઉંચા કરી સેટ કરવા.",
-        "થ્રેસરમાં ચેમ્બરની અંદરનો ગીસી પડદો નીચે હોય તો ગીસી વાળો પડદો પ્રમાણસર ઉંચે ઉઠાવી લેવો."
-      ],
-      solutionSpeech: ["ટ્રેક્ટર અને પંખાની સ્પીડ ઓછી કરવી.", "જો ચારણો ધીમે હોય તો સ્પીડ વધારવી.", "ચારણો પ્રમાણસર નીચે ઉતારવો અને ઢાળ સીધો કરવો.", "સાઈડના અને ગીસી પડદા પ્રમાણસર ઉંચા કરવા."]
-    },
-    {
-      title: "અનાજ સાફ ન નીકળતું હોય",
-      solutionDisplay: [
-        "રોટરની સ્પીડ ઓછી હોય તો રોટરની સ્પીડ વધારવી.",
-        "પંખાની સ્પીડ ઓછી હોય તો પંખાની સ્પીડ વધારવી.",
-        "ચારણો વધારે પડતો નીચે લીધેલો હોય તો ચારણો ઊંચો કરવો.",
-        "થ્રેસરમાં ચેમ્બરની અંદરનો ગીસી પડદો ઉંચો લીધેલો હોય તો ગીસી પડદો નીચે લેવો.",
-        "થ્રેસરના ચેમ્બર નીચેના સાઈડના પડદા ઉંચા લીધેલા હોય તો પડદા પ્રમાણસર નીચે રાખવા.",
-        "સૂપડીમાં જાળી નીચે ખસતું પતરું અંદરની બાજુ ખેંચેલું હોય તો પતરું બહારની બાજુ ખેંચી લેવું.",
-        "ચારણાનો ઢાળ પાછળ વધારે હોય તો ચારણો પાછળથી ઉંચો લેવો.",
-        "ચારણાની સ્પીડ ઓછી કે વધારે હોય તો ચારણાની સ્પીડ મધ્યમ કરવી.",
-        "સૂપડામાં ઓછું કે વધારે ઓરવામાં આવતું હોય તો એક સરખા પ્રમાણમાં ઓરવું.",
-        "થ્રેસર હુક આગળથી નીચું હોય તો થ્રેસર હુક આગળથી ઉંચું કરવું.",
-        "સૂપડીમાં હવા ઓછી કરેલ હોય તો સૂપડીમાં હવા વધારી દેવી.",
-        "હવાના નાના ભૂંગળામાં ખિસકોલી એ માળો કરેલો હોય તો માળો કાઢી નાખવો."
-      ],
-      solutionSpeech: ["રોટર અને પંખાની સ્પીડ વધારવી.", "ચારણો ઊંચો કરવો અને પડદા નીચે લેવા.", "સૂપડીનું પતરું બહાર ખેંચવું અને ચારણાનો ઢાળ સેટ કરવો.", "ઓરવાનું પ્રમાણ એકસરખું રાખવું.", "થ્રેસર હુક ઊંચો કરવો, હવા વધારવી અને હવાના ભૂંગળા સાફ કરવા."]
-    },
-    {
-      title: "ચારણાથી બરાબર ચળાતું ન હોય",
-      solutionDisplay: [
-        "ચારણાની જાળીઓ ભરાઈ ગઈ હોય તો પાવડી (તાવેથા)નો ઉપયોગ કરી જાળીઓ સાફ કરી દેવી.",
-        "ચારણો પાછળ નમેલો હોય તો ચારણો સમતોલ કરવો.",
-        "ચારણાની સ્પીડ વધારે હોય તો ચારણાની સ્પીડ ઓછી કરવી.",
-        "ચારણામાં જાળીઓ ઉંધી લગાવેલી હોય તો જાળીઓ સીધી લગાવી દેવી."
-      ],
-      solutionSpeech: ["પાવડીથી જાળીઓ સાફ કરવી.", "ચારણો સમતોલ કરવો અને સ્પીડ ઓછી કરવી.", "જાળીઓ સીધી લગાવવી."]
-    },
-    {
-      title: "થ્રેસીંગ ડ્રમ ભરાઇ જવું",
-      solutionDisplay: [
-        "એકી સાથે વધારે પડતું ઓરવાતું હોય તો ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.",
-        "મેઇન રોટરની સ્પીડ ઓછી હોય તો મેઇન રોટરની સ્પીડ વધારવી.",
-        "ભેજવાળું કે લીલું ઓરવામાં આવતું હોય તો સૂકાયેલું ઓરવું.",
-        "થ્રેસીંગ ચેમ્બરની અંદરનો ગીસી પડદો નીચે ઉતરી ગયો હોય તો ગીસી પડદો યોગ્ય પ્રમાણમાં ઉંચો લેવો.",
-        "થ્રેસીંગ ચેમ્બરની કટર વધારે પડતી નીચી રાખેલી હોય તો કટર સાધારણ ઉંચી કરવી."
-      ],
-      solutionSpeech: ["ડ્રમ ખાલી કરી સપ્રમાણ ઓરવું.", "મેઇન રોટરની સ્પીડ વધારવી.", "સૂકો પાક ઓરવો અને પડદો તેમજ કટર ઊંચા કરવા."]
-    },
-    {
-      title: "થ્રેસર નું ધ્રુજવું",
-      solutionDisplay: [
-        "રોટરની શાફ્ટ આઉટ હોય તો રોટરની શાફ્ટ થ્રુ(બેલેન્સ) કરાવવી.",
-        "થ્રેસરના ટાયરનો સપોર્ટ ઢીલો પડી ગયો હોય તો પથ્થર કે લાકડાનો ટુકડો મૂકી ટાયરને સપોર્ટ આપવો.",
-        "ટાયરમાં હવાનું પ્રમાણ ઘટી ગયું હોય તો ટાયરોમાં પ્રમાણસર હવા ભરાવી લેવી.",
-        "મેઇન રોટરનું યોગ્ય રીતે બેલેન્સ કરેલું ન હોય તો મેઇન રોટરને બેલેન્સ કરાવી લેવું.",
-        "બેરીંગો તૂટી ગઈ હોય તો નવી બેરીંગો નખાવવી.",
-        "થ્રેસર કે ટ્રેક્ટર સાઈડ જોઈન્ટ આઉટ થઈ ગયો હોય તો જોઈન્ટ વ્યવસ્થિત લેથ ઉપર ચઢાવી રીપેરીંગ કરી દેવો.",
-        "થ્રેસરમાં રોટરના પાટા ખોટી રીતે લગાવેલા હોય તો પાટા ખોલીને લાઈન મુજબ લગાવી દેવા.",
-        "થ્રેસરનું ફ્લાયવ્હીલ આઉટ હોય તો ફ્લાયવ્હીલ બદલીને નવું લગાવી દેવું.",
-        "વી-બેલ્ટ (પટ્ટા) ઢીલા પડી ગયા હોય તો સપોર્ટપુલીથી પટ્ટા ટાઈટ કરવા."
-      ],
-      solutionSpeech: ["રોટર શાફ્ટ અને બેલેન્સિંગ ચેક કરાવવું.", "ટાયર સપોર્ટ અને હવા ચેક કરવી.", "બેરીંગો અને જોઈન્ટ રીપેર કરાવવા.", "રોટરના પાટા લાઈનમાં લગાવવા અને વી-બેલ્ટ ટાઈટ કરવા."]
-    }
-  ],
-  hi: [
-    {
-      title: "दाने टूटना",
-      solutionDisplay: [
-        "ट्रैक्टर की गति अधिक हो तो गति कम करे।",
-        "सूपड़े में फसल डालने की मात्रा ज़्यादा/कम हो तो एकसमान डाले।",
-        "कटर (कॉनकेव) ऊँचा हो तो गेज के अनुसार थोड़ा नीचे करे।",
-        "चैंबर(कटर) के नीचे फसल या भूसा भर गया हो तो गीसी पड़दे ऊँचा करे।"
-      ],
-      solutionSpeech: ["ट्रैक्टर की गति कम करे।", "फसल एकसमान मात्रा में डाले।", "कटर को थोड़ा नीचे करे और गीसी पड़दे ऊँचा करे।"]
-    },
-    {
-      title: "भूसे के साथ दाने जाना",
-      solutionDisplay: [
-        "थ्रेशर की गति अधिक हो तो ट्रैक्टर की गति कम करे।",
-        "पंखे की गति अधिक हो तो पंखे की गति कम करे।",
-        "छलना धीमा चलता हो तो छलने की गति बढ़ाए।",
-        "छलना ज़्यादा ऊँचा हो तो छलने को सही मात्रा में नीचे उतारे।",
-        "छलने का ढलाव उल्टा हो तो छलने को दाने निकलने की ओर नीचे करे।",
-        "थ्रेशर में चैंबर के नीचे की साइड के पड़दे ज़्यादा नीचे रखे हों तो पड़दे को सही मात्रा में ऊँचा करके सेट करे।",
-        "थ्रेशर में चैंबर के अंदर का गीसी पड़दा नीचे हो तो सही मात्रा में ऊँचा उठाले।"
-      ],
-      solutionSpeech: ["ट्रैक्टर और पंखे की गति कम करे।", "छलने की गति बढ़ाएं और ढलाव सही करे।", "साइड के और गीसी पड़दे ऊँचा करे।"]
-    },
-    {
-      title: "फसल साफ न निकलना",
-      solutionDisplay: [
-        "रोटर की गति कम हो तो रोटर की गति बढ़ाए।",
-        "पंखे की गति कम हो तो पंखे की गति बढ़ाए।",
-        "छलना ज़्यादा नीचे लिया गया हो तो छलने को ऊँचा करे।",
-        "थ्रेशर में चैंबर के अंदर का गीसी पड़दा ऊँचा लिया गया हो तो नीचे करे।",
-        "थ्रेशर के चैंबर के नीचे की साइड के पड़दे ऊँचे लिए गए हों तो पर्दों को सही मात्रा में नीचे रखे।",
-        "सूपड़ी में जाली के नीचे खिसकने वाला पतरा अंदर की ओर खींचा गया हो तो पतरे को बाहर की ओर खींच ले।",
-        "छलने का ढलाव पीछे अधिक हो तो छलने को पीछे से ऊँचा करे।",
-        "छलने की गति ज़्यादा/कम हो तो मध्यम करे।",
-        "सूपड़े में फसल एकसमान मात्रा में डाले।",
-        "थ्रेशर हुक आगे से नीचा हो तो उसे ऊँचा करे।",
-        "सूपडी में हवा कम की गई हो तो उसे बढ़ा दे।",
-        "हवा के छोटे भूंगले में गिलहरी ने घोंसला बनाया हो तो घोंसला हटा दे।"
-      ],
-      solutionSpeech: ["रोटर और पंखे की गति बढ़ाएं।", "छलने और पड़दे की सेटिंग सही करे।", "सूपड़ी का पतरा बाहर खींचे और ढलाव सही करे।", "हुक ऊँचा करे और हवा के पाइप साफ़ करे।"]
-    },
-    {
-      title: "छलना से ठीक न छलना",
-      solutionDisplay: [
-        "छलने की नीचे की जालियां भर जाए तो पावड़ी का उपयोग कर छलने की जालियां साफ़ करे।",
-        "छलना पीछे झुका हो तो छलने को समतल करे।",
-        "छलने की गति अधिक हो तो उसे कम करे।",
-        "छलने में जालियाँ उलटी लगी हों तो उन्हें सीधा लगाए।"
-      ],
-      solutionSpeech: ["जालियों को साफ़ करे और छलने को समतल रखे।", "गति कम करे और जालियां सीधी लगाए।"]
-    },
-    {
-      title: "थ्रेसिंग ड्रम(कोठी) भर जाना",
-      solutionDisplay: [
-        "एक साथ बहुत अधिक फसल न डालें, कोठी खाली करके उसे सही मात्रामें डाले।",
-        "मुख्य रोटर की गति कम हो तो उसे सही तरह से बढ़ाए।",
-        "गीली या हरी फसल डाली जा रही हो तो सुखी ही डाले।",
-        "थ्रेसिंग चैम्बर के अंदर का गीसी पड़दा नीचे उतर गया हो तो सही मात्रा में ऊपर करे।",
-        "थ्रेसिंग चैंबर का कटर बहुत नीचा रखा गया हो तो कटर को सही मात्रा में ऊँचा करे।"
-      ],
-      solutionSpeech: ["कोठी खाली करे और फसल एकसमान डाले।", "रोटर की गति बढ़ाएं और सूखी फसल का उपयोग करे।"]
-    },
-    {
-      title: "थ्रेशर का कंपन",
-      solutionDisplay: [
-        "रोटर का शाफ़्ट थ्रु(बैलेन्स) करवाए।",
-        "टायर को पत्थर या लकड़ी का टुकड़ा लगाकर सपोर्ट दे।",
-        "टायर में हवा का दबाव सही रखें।",
-        "मेन रोटर का बैलेंसिंग सही करवाएं।",
-        "बेअरिंग तूट गई हो तो नई डलवाए।",
-        "थ्रेशर या ट्रेक्टर साईड जॉइंट आउट हो तो लेथ पर रिपेर करवाए।",
-        "रोटर के पाटे सही लाइन में लगाए।",
-        "लोडव्हील आउट हो तो नया डलवाए।",
-        "ऑपरेटिंग मोड: ढीले पड़े हो तो सपोर्ट पुली से टाइट करे।"
-      ],
-      solutionSpeech: ["शाफ़्ट और बैलेंसिंग चेक करवाए।", "टायर और बेअरिंग की जांच करे।", "जॉइंट और पाटे सही करे और बेल्ट टाइट करे।"]
-    }
-  ],
-  en: [
-    {
-      title: "Grain Breakage",
-      solutionDisplay: [
-        "If the tractor's speed is too high, reduce the speed.",
-        "If the amount fed into the feeder is incorrect, maintain uniform feeding.",
-        "If the cutter (concave) is too high, adjust it slightly lower as per the gauge.",
-        "If grain or chaff is clogged under the chamber, raise the sieve curtain."
-      ],
-      solutionSpeech: ["Reduce tractor speed and ensure uniform feeding.", "Adjust the cutter lower and raise the sieve curtain if needed."]
-    },
-    {
-      title: "Grains Going with Chaff",
-      solutionDisplay: [
-        "If the thresher's speed is too high, reduce the tractor's speed.",
-        "If the fan's speed is too high, lower the fan's speed.",
-        "If the sieve feeder runs slowly, increase the sieve feeder's speed.",
-        "If the sieve feeder is too high, lower it proportionately.",
-        "If the sieve feeder's slope is reversed, lower it toward the grain outlet side.",
-        "If the chamber's side curtains are too low, raise them proportionately.",
-        "If the sieve curtain inside the chamber is too low, raise it proportionately."
-      ],
-      solutionSpeech: ["Reduce speed and adjust the sieve feeder's height and slope.", "Raise the side and internal sieve curtains."]
-    },
-    {
-      title: "Grain Not Coming Out Clean",
-      solutionDisplay: [
-        "If the rotor's speed is low, increase the rotor's speed.",
-        "If the fan's speed is low, increase the fan's speed.",
-        "If the sieve feeder is set too low, raise it.",
-        "If the sieve curtain inside the chamber is set too high, lower it.",
-        "If the chamber's side curtains are set too high, lower them proportionately.",
-        "If the movable sheet under the feeder mesh is pulled inward, pull it outward.",
-        "If the sieve feeder's rear slope is too high, raise the rear end.",
-        "If the sieve feeder's speed is incorrect, set it to medium speed.",
-        "Feed crops uniformly into the feeder.",
-        "If the thresher hook is low, raise the front of the hook.",
-        "If air flow in the feeder is low, increase it.",
-        "If squirrels have nested in air ducts, remove the nest."
-      ],
-      solutionSpeech: ["Increase rotor and fan speed.", "Adjust sieve and curtain heights.", "Check the feeder sheet, hook height, and clear any nests in air ducts."]
-    },
-    {
-      title: "Sieve Feeder Not Working Properly",
-      solutionDisplay: [
-        "If meshes are clogged, clean them using a trowel.",
-        "If the sieve feeder is tilted backward, level it.",
-        "If the speed is too high, reduce it.",
-        "If meshes are installed upside down, install them correctly."
-      ],
-      solutionSpeech: ["Clean meshes, level the feeder, and check the speed and mesh orientation."]
-    },
-    {
-      title: "Threshing Drum Jamming",
-      solutionDisplay: [
-        "Avoid overfeeding; empty the drum and feed proportionately.",
-        "If main rotor speed is low, increase it appropriately.",
-        "If crops are wet, feed dried crops.",
-        "If the internal sieve curtain is low, raise it.",
-        "If the cutter is too low, raise it slightly."
-      ],
-      solutionSpeech: ["Ensure uniform feeding and increase rotor speed.", "Use dry crops and adjust the curtain and cutter height."]
-    },
-    {
-      title: "Thresher Vibrating",
-      solutionDisplay: [
-        "Balance the rotor shaft.",
-        "Support the tires with stones or wood if loose.",
-        "Maintain correct tire pressure.",
-        "Ensure the main rotor is properly balanced.",
-        "Replace broken bearings.",
-        "Repair misaligned joints on a lathe.",
-        "Align rotor blades correctly in a line.",
-        "Replace the flywheel if it is out.",
-        "Tighten loose Operating modes using the pulley."
-      ],
-      solutionSpeech: ["Balance the shaft and rotor.", "Check tires and bearings.", "Repair joints and align blades and belts."]
-    }
-  ]
-};
-
-const languageSelect = document.getElementById("languageSelect");
-const cropSelect = document.getElementById("cropSelect");
-const problemSelect = document.getElementById("problemSelect");
-const ukelBtn = document.getElementById("ukelBtn");
-const backBtn = document.getElementById("backBtn");
-const stopVoiceBtn = document.getElementById("stopVoiceBtn");
-const modelSelect = document.getElementById("modelSelect");
-
-const languageBox = document.getElementById("languageBox");
-const selectionBox = document.getElementById("selectionBox");
-const summaryBox = document.getElementById("summaryBox");
-const resultBox = document.getElementById("resultBox");
-const actionButtons = document.getElementById("actionButtons");
-
-languageSelect.addEventListener("change", function(){
-
-  const lang = this.value;
-  if(!lang) return;
-
-  document.getElementById("modelTitle").innerText = "Select Model";
-  document.getElementById("cropTitle").innerText = uiText[lang].crop;
-  document.getElementById("problemTitle").innerText = uiText[lang].problem;
-  ukelBtn.innerText = uiText[lang].button;
-  backBtn.innerText = uiText[lang].back;
-  stopVoiceBtn.innerText = uiText[lang].stop;
-
-  cropSelect.innerHTML = '<option value="">--</option>';
-  Object.keys(crops).forEach(key=>{
-    let option = document.createElement("option");
-    option.value = key;
-    option.textContent = crops[key][lang].name;
-    cropSelect.appendChild(option);
-  });
-  
-modelSelect.addEventListener("change", function(){
-
-  const modelKey = this.value;
-  const lang = languageSelect.value;
-  cropSelect.disabled = false;
+console.log("✅ Marshal Thresher - Sieve Mesh with Override Support Added");
 
 
-  if(!modelKey || !lang) return;
 
-  // Clear crop dropdown
-  cropSelect.innerHTML = '<option value="">--</option>';
 
-  // Filter crops based on model
-  models[modelKey].crops.forEach(key=>{
-    if(crops[key]){
-      let option = document.createElement("option");
-      option.value = key;
-      option.textContent = crops[key][lang].name;
-      cropSelect.appendChild(option);
-    }
-  });
-  
-function getVBeltSettings(modelType, cropData, lang){
-
-  let lines = [];
-
-  // Skip for single shaft models
-  if(modelType === "noVBelt") return lines;
-
-  const modeText = {
-    gu: { single: "સિંગલ શાફ્ટ મોડ", double: "ડબલ શાફ્ટ મોડ" },
-    hi: { single: "सिंगल शाफ्ट मोड", double: "डबल शाफ्ट मोड" },
-    en: { single: "Single shaft mode", double: "Double shaft mode" }
-  };
-
-  const mode = cropData.settingsDisplay[0]?.includes("ડબલ") ? "double" : "single";
-
-  if(modelType === "doubleShaft"){
-
-    if(mode === "single"){
-      lines.push(modeText[lang].single);
-      lines.push("Bottom pulley → Large");
-      lines.push("Top pulley → Small");
-    } else {
-      lines.push(modeText[lang].double);
-      lines.push("Rotor: Bottom small, Top large");
-      lines.push("Fan: Bottom large, Fan small");
-    }
-  }
-
-  if(modelType === "maharaja"){
-
-    if(mode === "single"){
-      lines.push(modeText[lang].single);
-      lines.push("Bottom pulley large, Top small");
-    } else {
-      lines.push(modeText[lang].double);
-      lines.push("Bottom pulley small, Top large");
-    }
-
-    // groove (optional)
-    if(cropData.fanGroove){
-      lines.push("Fan groove: " + cropData.fanGroove);
-    }
-  }
-
-  return lines;
-}
-});
-  
-  problemSelect.innerHTML = '<option value="">--</option>';
-  problems[lang].forEach((p,index)=>{
-    let option = document.createElement("option");
-    option.value = index;
-    option.textContent = p.title;
-    problemSelect.appendChild(option);
-  });
-
-  selectionBox.classList.remove("hidden");
-});
-
-ukelBtn.addEventListener("click", function(){
-
-  const lang = languageSelect.value;
-  const cropKey = cropSelect.value;
-  const problemIndex = problemSelect.value;
-
-  if(!cropKey || problemIndex==="") return;
-
-  const cropData = crops[cropKey][lang];
-  const modelKey = modelSelect.value;
-
-  const modelType = models[modelKey]?.type;
-
-let finalSettings = [...cropData.settingsDisplay];
-
-// Inject V-belt logic
-const vbelt = getVBeltSettings(modelType, cropData, lang);
-
-if(vbelt.length){
-  finalSettings.splice(1, 0, ...vbelt);
-}
-  const problemData = problemIndex !== "" ? problems[lang][problemIndex] : null;
-
-  languageBox.classList.add("hidden");
-  selectionBox.classList.add("hidden");
-
-  summaryBox.classList.remove("hidden");
-  resultBox.classList.remove("hidden");
-  actionButtons.classList.remove("hidden");
-
-  summaryBox.innerHTML = `
-    <h3>Language: ${uiText[lang].languageName}</h3>
-    <h3>Crop: ${cropData.name}</h3>
-    <h3>Problem: ${problemData.title}</h3>
-  `;
-
-  resultBox.innerHTML = `
-    <h2>${uiText[lang].settingTitle}</h2>
-   <ul>${finalSettings.map(s=>`<li>${s}</li>`).join("")}</ul>
-    <div style="margin-top:25px;"></div>
-    <h2>${uiText[lang].solutionTitle}</h2>
-    ${problemData ? `
-  <h2>${uiText[lang].solutionTitle}</h2>
-  <ul>${problemData.solutionDisplay.map(s=>`<li>${s}</li>`).join("")}</ul>
-` : ""}
-  `;
-
-  let finalSpeech = [...cropData.settingsSpeech];
-
-if(vbelt.length){
-  finalSpeech.splice(1, 0, ...vbelt);
-}
-
-speak(
-  lang,
-  finalSpeech,
-  problemData ? problemData.solutionSpeech : []
-);
-});
-
-function speak(lang, settings, solutions){
-
-  let text = uiText[lang].introSetting + " ";
-  settings.forEach(s=> text += s + ". ");
-  text += uiText[lang].introSolution + " ";
-  solutions.forEach(s=> text += s + ". ");
-
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = lang === "gu" ? "gu-IN" : lang + "-IN";
-  utter.rate = 0.9;
-  utter.pitch = 1;
-
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utter);
-}
-
-stopVoiceBtn.addEventListener("click", ()=> speechSynthesis.cancel());
-
-backBtn.addEventListener("click", ()=>{
-  speechSynthesis.cancel();
-  summaryBox.classList.add("hidden");
-  resultBox.classList.add("hidden");
-  actionButtons.classList.add("hidden");
-  languageBox.classList.remove("hidden");
-  selectionBox.classList.remove("hidden");
-});
-
-});
 
 
