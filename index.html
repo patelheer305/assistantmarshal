@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
   <title>Marshal Thresher Smart Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Important for Bubblewrap / TWA -->
+  <meta name="theme-color" content="#d70000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="full-screen" content="yes">
+
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,7 +27,7 @@
 
   <!-- Language Selection -->
   <div id="languageBox" class="card">
-    <h2>Select Language</h2>
+    <h2>ભાષા પસંદ કરો / भाषा चुने</h2>
     <select id="languageSelect">
       <option value="">-- Select Language --</option>
       <option value="gu">ગુજરાતી</option>
@@ -27,26 +36,16 @@
     </select>
   </div>
 
-  <!-- Selection Section -->
+<div id="modelBox" class="card hidden">
+  <h2 id="modelTitle">Select Model</h2>
+  <select id="modelSelect"></select>
+</div>
+  
+  <!-- Crop + Problem -->
   <div id="selectionBox" class="card hidden">
+    <h2 id="cropTitle"></h2>
+    <select id="cropSelect"></select>
 
-    <!-- ✅ NEW: MODEL SELECTION -->
-    <h2 id="modelTitle">Select Model</h2>
-    <select id="modelSelect">
-      <option value="">-- Select Model --</option>
-      <option value="shahenshah">Marshal Shahenshah</option>
-      <option value="smart_single">Smart Single Shaft</option>
-      <option value="jageerdar_single">Jageerdar Single Shaft</option>
-      <option value="smart_double">Smart Double Shaft</option>
-      <option value="jageerdar_double">Jageerdar Double Shaft</option>
-      <option value="maharaja">Maharaja</option>
-    </select>
-
-    <!-- Crop -->
-    <h2 id="cropTitle" class="mt-15"></h2>
-    <select id="cropSelect" disabled></select>
-
-    <!-- Problem -->
     <h2 id="problemTitle" class="mt-15"></h2>
     <select id="problemSelect"></select>
 
@@ -68,5 +67,11 @@
 </main>
 
 <script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/Assistant/service-worker.js")
+    .then(() => console.log("Service Worker Registered"));
+}
+</script>
 </body>
 </html>
