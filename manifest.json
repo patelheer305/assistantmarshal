@@ -2,6 +2,7 @@
   "name": "Marshal Thresher Smart Assistant",
   "short_name": "Thresher Assistant",
   "start_url": "/assistantmarshal/",
+  "scope": "/assistantmarshal/",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen"],
   "theme_color": "#d70000",
